@@ -6,3 +6,11 @@ dist/
 !.env.example
 .DS_Store
 Thumbs.db
+
+# Android / Bubblewrap
+*.keystore
+*.apk
+*.aab
+android-twa/.gradle/
+android-twa/build/
+android-twa/app/build/

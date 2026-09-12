@@ -1,0 +1,19 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "ir.arcado.game",
+      "sha256_cert_fingerprints": ["94:60:8E:CA:FD:2D:87:0F:E1:C8:85:F8:64:D8:E8:B3:74:EB:56:AF:7F:5E:28:32:47:EC:1E:24:59:7C:A5:52"]
+    }
+  },
+  {
+    "relation": [
+      "check_validation"
+    ],
+    "target": {
+      "namespace": "cafebazaar_twa",
+      "package_name": "ir.arcado.game"
+    }
+  }
+]
