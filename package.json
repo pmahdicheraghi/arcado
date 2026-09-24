@@ -10,7 +10,8 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write \"src/**/*.{ts,tsx,css}\" \"public/**/*.{js,webmanifest}\" \"*.{html,json,md,js}\"",
-    "format:check": "prettier --check \"src/**/*.{ts,tsx,css}\" \"public/**/*.{js,webmanifest}\" \"*.{html,json,md,js}\""
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,css}\" \"public/**/*.{js,webmanifest}\" \"*.{html,json,md,js}\"",
+    "test": "node --experimental-strip-types scripts/check-logic.ts"
   },
   "dependencies": {
     "animejs": "3.2.2",

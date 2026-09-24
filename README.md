@@ -32,34 +32,18 @@ ESLint is configured with the TypeScript ESLint ruleset, while Prettier handles 
 
 ## Releases and deployment
 
-Side Quest uses semantic versions. Use a patch for fixes, a minor version for new games or features, and a major version for incompatible stored-data or experience changes. `package.json` is the release source of truth; the release workflow rejects a Git tag that does not match it.
+Side Quest uses semantic versions. Use a patch for fixes, a minor version for new games or features, and a major version for incompatible stored-data or experience changes. `package.json` tracks the current version.
 
-After this deployment setup is merged, publish the first controlled release:
+Deployments are automated through GitHub Pages:
 
-```bash
-git tag v1.3.0
-git push origin v1.3.0
-```
+- Every push to the `master` branch and manual triggers via `workflow_dispatch` run formatting checks, linting, tests, and a production build.
+- The build artifact is automatically published to GitHub Pages via the `github-pages` environment.
 
-For later releases, `npm version patch`, `npm version minor`, or `npm version major` updates the package and lockfile, creates the version commit, and creates the matching Git tag. Push both with `git push --follow-tags`.
+### Setting up GitHub Pages
 
-Pull requests and pushes to `master` run formatting, linting, and a production build. A `v*` tag builds one artifact and deploys it through the protected `production` GitHub environment. Configure that environment with a required reviewer if production should wait for approval.
-
-The object storage provider must expose an S3-compatible API. Create a `production` GitHub environment with these environment variables:
-
-- `APP_URL` — the public HTTPS URL where Side Quest is served, without a trailing slash
-- `OBJECT_STORAGE_ENDPOINT` — the provider's HTTPS S3 API endpoint, not the public website URL
-- `OBJECT_STORAGE_BUCKET` — the provider's bucket or container name
-- `OBJECT_STORAGE_REGION` — the provider region; omit it to use `us-east-1`
-
-Add these values as GitHub environment **secrets**, never variables or repository files:
-
-- `OBJECT_STORAGE_ACCESS_TOKEN`
-- `OBJECT_STORAGE_SECRET_TOKEN`
-
-The workflow maps those secrets to the standard S3 client credential variables at runtime. The script retains old hashed bundles intentionally, publishes `version.json` last, and verifies both the uploaded object and public website. If the provider has a CDN or caching proxy, configure `index.html`, `sw.js`, and `version.json` with a zero or revalidation-only TTL. The deployment intentionally fails when the public URL remains stale so a release cannot appear successful while users still receive old control files.
-
-Enable object versioning if the provider supports it and use a lifecycle rule to remove unused hashed assets after a suitable rollback window, such as 90 days. If the provider is not S3 compatible, replace `scripts/deploy-static-site.sh` with its supported CLI or upload API.
+1. In your GitHub repository, open **Settings**.
+2. Under the **Code and automation** section on the sidebar, click **Pages**.
+3. Under **Build and deployment**, set **Source** to **GitHub Actions**.
 
 The menu currently includes:
 
@@ -104,8 +88,8 @@ public/
   icon.svg              application icon
   manifest.webmanifest  install metadata
   sw.js                 production offline cache
-.github/workflows/      pull-request CI and tag-based releases
-scripts/                deployment scripts used by CI
+.github/workflows/      GitHub Pages deployment workflow
+scripts/                standalone test and logic checks
 ```
 
 Each game is a self-contained React component with local state and effects for timers, bot turns, haptics, and motion. The app switches screens through typed React view state in `src/app/react-app.tsx`.
