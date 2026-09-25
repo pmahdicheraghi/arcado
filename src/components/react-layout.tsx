@@ -183,3 +183,19 @@ export function Tip({ children }: { children: ReactNode }) {
     </p>
   );
 }
+
+export function GameStatus({
+  children,
+  role = 'status',
+  ariaLive = 'polite',
+}: {
+  children: ReactNode;
+  role?: 'status' | 'alert';
+  ariaLive?: 'polite' | 'assertive';
+}) {
+  return (
+    <div className="game-status" role={role} aria-live={ariaLive}>
+      {children}
+    </div>
+  );
+}

@@ -3,7 +3,7 @@ import { animateIn } from '../../app/animation';
 import { useI18n } from '../../app/i18n';
 import { triggerHaptic } from '../../app/settings';
 import { getRoundStarter, type GameSetup, type Player } from '../../app/types';
-import { GameHeader, MatchResultToast, ScoreStrip, Tip } from '../../components/react-layout';
+import { GameHeader, GameStatus, MatchResultToast, ScoreStrip, Tip } from '../../components/react-layout';
 import { playMoveSound, playPairSound, playTapSound } from '../../app/sfx';
 import { recordMatchResult } from '../../app/stats';
 import type { PlayerNames } from '../../app/player-names';
@@ -163,18 +163,17 @@ export function NimPage({ setup, playerNames, onExit }: { setup: GameSetup; play
       />
 
       <div className="nim-game-layout">
-        <div className="nim-status-bar" role="status" aria-live="polite">
+        <GameStatus>
           {winner
             ? t('winsRound', { player: winner === 'X' ? playerNames.X : playerNames.O })
             : isBotThinking
               ? t('playerTurn', { player: playerNames.O })
               : t('playerTurn', { player: currentTurnName })}
-        </div>
+        </GameStatus>
 
         <section className="nim-board" aria-label={t('nim')}>
           {board.map((count, rowIndex) => {
             const isRowSelected = selectedRow === rowIndex;
-            const rowCountFmt = numberFormatter.format(count);
             const rowIdxFmt = numberFormatter.format(rowIndex + 1);
 
             return (
@@ -182,11 +181,6 @@ export function NimPage({ setup, playerNames, onExit }: { setup: GameSetup; play
                 key={rowIndex}
                 className={`nim-row-wrapper nim-row-${rowIndex} ${isRowSelected ? 'is-selected-row' : ''} ${count === 0 ? 'is-empty' : ''}`}
               >
-                <div className="nim-row-header">
-                  <span>{t('nimPile', { pile: rowIdxFmt })}</span>
-                  <b>{rowCountFmt}</b>
-                </div>
-
                 <div className="nim-matches-rack">
                   {Array.from({ length: count }, (_, mIndex) => {
                     const isStaged = isRowSelected && mIndex < selectedCount;

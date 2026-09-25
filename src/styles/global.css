@@ -198,13 +198,20 @@ p {
   background: var(--board-surface-bg, var(--panel));
   box-shadow: var(--shadow-board);
 }
+.game-status,
 .turn-label {
-  margin-bottom: 14px;
+  min-height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  margin-bottom: 12px;
   color: var(--game-accent, var(--acid));
   font-family: var(--font-mono);
   font-size: var(--text-detail);
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
+  line-height: 1.3;
 }
 .score-strip {
   gap: 16px;
@@ -901,18 +908,83 @@ h1 em {
 }
 .tug-card-center-knot {
   position: absolute;
-  width: 40px;
-  height: 40px;
+  width: 22px;
+  height: 22px;
   border-radius: var(--radius-round);
   background: var(--game-accent);
   color: var(--game-accent-ink);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
+  font-size: 10px;
   font-weight: 800;
-  border: 2.5px solid var(--game-accent-ink);
+  border: 2px solid var(--game-accent-ink);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
   z-index: 2;
+}
+.card-visual.colorwar-visual {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 4px;
+  padding: 36px 26px 84px;
+  transform: rotate(-4deg) scale(1.04);
+  opacity: 0.72;
+}
+.colorwar-visual span {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+.colorwar-visual span:empty::after {
+  content: '';
+  width: 4px;
+  height: 4px;
+  border-radius: var(--radius-round);
+  background: color-mix(in srgb, var(--game-accent-ink) 25%, transparent);
+}
+.colorwar-visual span i {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-round);
+  display: block;
+  box-shadow: 0 2px 7px rgba(0, 0, 0, 0.22);
+}
+.colorwar-visual span i.x {
+  background: var(--acid);
+}
+.colorwar-visual span i.o {
+  background: var(--orange);
+}
+.colorwar-visual span i.x.d1 {
+  background: radial-gradient(circle 2.5px at 50% 50%, #141f1a 98%, transparent 100%), var(--acid);
+}
+.colorwar-visual span i.o.d1 {
+  background: radial-gradient(circle 2.5px at 50% 50%, #141f1a 98%, transparent 100%), var(--orange);
+}
+.colorwar-visual span i.x.d2 {
+  background:
+    radial-gradient(circle 2.2px at 37% 50%, #141f1a 98%, transparent 100%),
+    radial-gradient(circle 2.2px at 63% 50%, #141f1a 98%, transparent 100%), var(--acid);
+}
+.colorwar-visual span i.o.d2 {
+  background:
+    radial-gradient(circle 2.2px at 37% 50%, #141f1a 98%, transparent 100%),
+    radial-gradient(circle 2.2px at 63% 50%, #141f1a 98%, transparent 100%), var(--orange);
+}
+.colorwar-visual span i.x.d3 {
+  background:
+    radial-gradient(circle 2.2px at 50% 36%, #141f1a 98%, transparent 100%),
+    radial-gradient(circle 2.2px at 38% 57%, #141f1a 98%, transparent 100%),
+    radial-gradient(circle 2.2px at 62% 57%, #141f1a 98%, transparent 100%), var(--acid);
+}
+.colorwar-visual span i.o.d3 {
+  background:
+    radial-gradient(circle 2.2px at 50% 36%, #141f1a 98%, transparent 100%),
+    radial-gradient(circle 2.2px at 38% 57%, #141f1a 98%, transparent 100%),
+    radial-gradient(circle 2.2px at 62% 57%, #141f1a 98%, transparent 100%), var(--orange);
 }
 .card-copy {
   position: relative;

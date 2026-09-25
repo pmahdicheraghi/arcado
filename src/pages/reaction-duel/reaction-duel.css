@@ -4,11 +4,13 @@
   margin: 0 auto;
 }
 
+.reaction-arena-wrap .game-status,
 .reaction-arena-wrap .turn-label {
   color: var(--muted);
   transition: color var(--duration-normal) var(--ease-standard);
 }
 
+.reaction-arena-wrap.phase-go .game-status,
 .reaction-arena-wrap.phase-go .turn-label {
   color: var(--game-accent);
 }

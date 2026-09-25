@@ -3,7 +3,7 @@ import { animateIn } from '../../app/animation';
 import { useI18n } from '../../app/i18n';
 import { triggerHaptic } from '../../app/settings';
 import type { GameSetup, Player } from '../../app/types';
-import { GameHeader, Icon, MatchResultToast, ScoreStrip, Tip } from '../../components/react-layout';
+import { GameHeader, GameStatus, Icon, MatchResultToast, ScoreStrip, Tip } from '../../components/react-layout';
 import { playPairSound, playTapSound } from '../../app/sfx';
 import { recordMatchResult } from '../../app/stats';
 import type { PlayerNames } from '../../app/player-names';
@@ -19,8 +19,10 @@ export function TugOfWarPage({ setup, playerNames, onExit }: { setup: GameSetup;
   const [scores, setScores] = useState<Record<Player, number>>({ X: 0, O: 0 });
   const [pullCounts, setPullCounts] = useState<Record<Player, number>>({ X: 0, O: 0 });
   const [round, setRound] = useState(1);
+  const [pulling, setPulling] = useState<Player | null>(null);
   const botTimerRef = useRef<number | null>(null);
   const nextRoundTimerRef = useRef<number | null>(null);
+  const pullTimeoutRef = useRef<number | null>(null);
   const positionRef = useRef(0);
   const winnerRef = useRef<Player | null>(null);
   const numberFormatter = new Intl.NumberFormat(language === 'fa' ? 'fa-IR' : 'en');
@@ -30,11 +32,16 @@ export function TugOfWarPage({ setup, playerNames, onExit }: { setup: GameSetup;
 
   useEffect(() => {
     animateIn('.score-strip, .tug-arena-wrap, .tip');
+    return () => {
+      if (pullTimeoutRef.current !== null) window.clearTimeout(pullTimeoutRef.current);
+    };
   }, []);
 
   const finishRound = (roundWinner: Player) => {
     setWinner(roundWinner);
     winnerRef.current = roundWinner;
+    setPulling(null);
+    if (pullTimeoutRef.current !== null) window.clearTimeout(pullTimeoutRef.current);
     const nextScores = {
       ...scores,
       [roundWinner]: scores[roundWinner] + 1,
@@ -62,6 +69,10 @@ export function TugOfWarPage({ setup, playerNames, onExit }: { setup: GameSetup;
     const nextPos = clampPosition(positionRef.current + delta);
     positionRef.current = nextPos;
     setPosition(nextPos);
+
+    setPulling(player);
+    if (pullTimeoutRef.current !== null) window.clearTimeout(pullTimeoutRef.current);
+    pullTimeoutRef.current = window.setTimeout(() => setPulling(null), 140);
 
     const roundWinner = checkTugWinner(nextPos);
     if (roundWinner) {
@@ -94,6 +105,8 @@ export function TugOfWarPage({ setup, playerNames, onExit }: { setup: GameSetup;
   const resetRound = (advanceRound = false) => {
     if (botTimerRef.current !== null) window.clearTimeout(botTimerRef.current);
     if (nextRoundTimerRef.current !== null) window.clearTimeout(nextRoundTimerRef.current);
+    if (pullTimeoutRef.current !== null) window.clearTimeout(pullTimeoutRef.current);
+    setPulling(null);
     const nextRound = advanceRound ? round + 1 : round;
     if (advanceRound) setRound(nextRound);
     setPosition(0);
@@ -119,8 +132,7 @@ export function TugOfWarPage({ setup, playerNames, onExit }: { setup: GameSetup;
   // In LTR: Player X is on the physical left (0%) and Player O on the physical right (100%).
   // In RTL: Player X is on the physical right (100%) and Player O on the physical left (0%).
   const displayPercentage = isRtl ? 100 - rawPercentage : rawPercentage;
-  const fillLeft = Math.min(displayPercentage, 50);
-  const fillWidth = Math.abs(displayPercentage - 50);
+  const ropeOffset = displayPercentage;
 
   // Knot arrow direction: points toward the pulling/leading side
   const knotGlyph = '✦';
@@ -153,23 +165,17 @@ export function TugOfWarPage({ setup, playerNames, onExit }: { setup: GameSetup;
       />
 
       <section className="tug-arena-wrap">
-        <div className="turn-label" role="status" aria-live="polite">
-          {status}
-        </div>
+        <GameStatus>{status}</GameStatus>
 
         <div className="tug-arena" aria-label={t('tugOfWar')}>
           <div className="tug-center">
             <div className="tug-rig">
-              <div className="tug-rope-track">
+              <div
+                className={`tug-rope-track ${pulling ? 'is-pulling' : ''}`}
+                style={{ '--rope-offset': `${ropeOffset}%` } as React.CSSProperties}
+              >
                 <div className="tug-rope-line" />
                 <span className="tug-track-center-tick" />
-                <div
-                  className="tug-rope-fill"
-                  style={{
-                    left: `${fillLeft}%`,
-                    width: `${fillWidth}%`,
-                  }}
-                />
                 <div className="tug-knot" style={{ left: `${displayPercentage}%` }}>
                   <span>{knotGlyph}</span>
                 </div>

@@ -13,6 +13,7 @@ import { DotsBoxesPage } from '../pages/dots-boxes/DotsBoxesPage';
 import { OthelloPage } from '../pages/othello/OthelloPage';
 import { NimPage } from '../pages/nim/NimPage';
 import { TugOfWarPage } from '../pages/tug-of-war/TugOfWarPage';
+import { ColorWarPage } from '../pages/color-war/ColorWarPage';
 import { GameSetupDialog } from '../components/GameSetupDialog';
 import { StatsPage } from '../components/StatsDialog';
 import { translate, useI18n, type Language } from './i18n';
@@ -217,7 +218,8 @@ export function ReactApp(): ReactElement {
       nextView === 'dots' ||
       nextView === 'othello' ||
       nextView === 'nim' ||
-      nextView === 'tug'
+      nextView === 'tug' ||
+      nextView === 'colorwar'
     ) {
       window.history.pushState(historyStateFor('setup'), '');
       setPendingGame(nextView);
@@ -298,6 +300,7 @@ export function ReactApp(): ReactElement {
       {view === 'othello' && <OthelloPage setup={gameSetup} playerNames={activePlayerNames} onExit={returnToMenu} />}
       {view === 'nim' && <NimPage setup={gameSetup} playerNames={activePlayerNames} onExit={returnToMenu} />}
       {view === 'tug' && <TugOfWarPage setup={gameSetup} playerNames={activePlayerNames} onExit={returnToMenu} />}
+      {view === 'colorwar' && <ColorWarPage setup={gameSetup} playerNames={activePlayerNames} onExit={returnToMenu} />}
       {pendingGame && (
         <GameSetupDialog
           gameTitle={gameTitle(pendingGame, language)}
@@ -336,6 +339,7 @@ function viewFromHistory(state: unknown): HistoryView | null {
     value === 'othello' ||
     value === 'nim' ||
     value === 'tug' ||
+    value === 'colorwar' ||
     value === 'setup' ||
     value === 'stats'
     ? (value as HistoryView)
@@ -350,8 +354,27 @@ function gameTitle(view: Exclude<View, 'menu' | 'settings' | 'stats'>, language:
   if (view === 'dots') return translate(language, 'dotsBoxes');
   if (view === 'nim') return translate(language, 'nim');
   if (view === 'tug') return translate(language, 'tugOfWar');
+  if (view === 'colorwar') return translate(language, 'colorwar');
   return translate(language, 'othello');
 }
+
+const COLOR_WAR_PREVIEW_CELLS: ReadonlyArray<{ player?: 'x' | 'o'; dots?: 1 | 2 | 3 }> = [
+  {},
+  { player: 'x', dots: 1 },
+  { player: 'x', dots: 2 },
+  {},
+  { player: 'o', dots: 2 },
+  { player: 'x', dots: 3 },
+  { player: 'o', dots: 3 },
+  { player: 'x', dots: 1 },
+  {},
+  {},
+  {},
+  {},
+  { player: 'x', dots: 2 },
+  { player: 'o', dots: 1 },
+  { player: 'o', dots: 3 },
+];
 
 function MenuPage({
   onNavigate,
@@ -719,6 +742,26 @@ function MenuPage({
           }
           onSelect={onNavigate}
         />
+        <GameCard
+          view="colorwar"
+          number={t('chainReaction')}
+          title={t('colorwar')}
+          description={t('colorwarDescription')}
+          visual={COLOR_WAR_PREVIEW_CELLS.map((cell, index) => (
+            <span key={index}>{cell.player && <i className={`${cell.player} d${cell.dots}`} />}</span>
+          ))}
+          firstMeta={
+            <>
+              <Icon name="grid" /> {t('twentyFiveCells')}
+            </>
+          }
+          secondMeta={
+            <>
+              <Icon name="bot" /> {t('vsBot')}
+            </>
+          }
+          onSelect={onNavigate}
+        />
       </section>
 
       <footer className="menu-footer">
@@ -767,7 +810,9 @@ function GameCard({
                 ? 'othello-visual'
                 : view === 'nim'
                   ? 'nim-visual'
-                  : 'tug-visual';
+                  : view === 'colorwar'
+                    ? 'colorwar-visual'
+                    : 'tug-visual';
 
   return (
     <button

@@ -30,8 +30,8 @@
   justify-content: flex-end;
   gap: 6px;
   border-radius: 0;
-  background: var(--game-wash);
-  color: var(--game-accent);
+  background: var(--acid-wash);
+  color: var(--acid);
   transition:
     background var(--duration-normal) var(--ease-standard),
     opacity var(--duration-normal) var(--ease-standard),
@@ -62,9 +62,14 @@
   opacity: 0.82;
 }
 
+.tug-player.player-one.is-winner {
+  opacity: 1;
+  background: var(--acid-tint);
+}
+
 .tug-player.is-winner {
   opacity: 1;
-  background: var(--game-tint);
+  background: var(--acid-tint);
 }
 
 .tug-player.is-bot.is-winner {
@@ -123,6 +128,8 @@
   max-width: 360px;
   position: relative;
   direction: ltr; /* Keeps coordinate calculations consistent across directions */
+  --tug-spring: cubic-bezier(0.25, 1.6, 0.5, 1);
+  --tug-spring-duration: 240ms;
 }
 
 .tug-rope-track {
@@ -139,14 +146,18 @@
   height: 10px;
   border-radius: var(--radius-pill);
   background: #1c2824;
-  border: 1px solid var(--line-strong);
+  border: 1px solid var(--game-accent-ink);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
   background-image: repeating-linear-gradient(
     45deg,
     transparent,
     transparent 6px,
     rgba(255, 255, 255, 0.22) 6px,
-    rgba(255, 255, 255, 0.22) 11px
+    rgba(255, 255, 255, 0.22) 12px
   );
+  background-size: 200% 100%;
+  background-position: calc(100% - var(--rope-offset, 50%)) 0;
+  transition: background-position var(--tug-spring-duration) var(--tug-spring);
 }
 
 .tug-track-center-tick {
@@ -160,42 +171,42 @@
   z-index: 1;
 }
 
-.tug-rope-fill {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  height: 10px;
-  background: var(--game-accent);
-  opacity: 0.65;
-  border-radius: var(--radius-pill);
-  transition:
-    width 60ms linear,
-    left 60ms linear;
-  z-index: 1;
-}
-
 .tug-knot {
   position: absolute;
   top: 50%;
-  width: 40px;
-  height: 40px;
+  width: 22px;
+  height: 22px;
   border-radius: var(--radius-round);
   background: var(--game-accent);
   color: var(--game-accent-ink);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
+  font-size: 10px;
   font-weight: 800;
-  border: 2.5px solid var(--game-accent-ink);
+  border: 2px solid var(--game-accent-ink);
   transform: translate(-50%, -50%);
-  transition: left 50ms cubic-bezier(0.1, 0.7, 0.1, 1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+  will-change: left;
+  transition:
+    left var(--tug-spring-duration) var(--tug-spring),
+    background var(--duration-normal) var(--ease-standard),
+    border-color var(--duration-normal) var(--ease-standard),
+    color var(--duration-normal) var(--ease-standard);
   z-index: 2;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tug-knot,
+  .tug-rope-fill,
+  .tug-rope-line {
+    transition: none;
+  }
 }
 
 .tug-page .score-mark.x-label,
 .tug-page .score-player-x.is-leading strong {
-  color: var(--game-accent);
+  color: var(--acid);
 }
 
 .tug-page .score-mark.o-label,
@@ -204,7 +215,7 @@
 }
 
 .tug-page .score-mark.x-label.is-active {
-  border-color: var(--game-border);
+  border-color: var(--acid-border-soft);
 }
 
 .tug-page .score-mark.o-label.is-active {

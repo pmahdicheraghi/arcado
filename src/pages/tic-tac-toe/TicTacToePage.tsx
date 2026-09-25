@@ -6,7 +6,7 @@ import { triggerHaptic } from '../../app/settings';
 import { playMoveSound, playPairSound } from '../../app/sfx';
 import { recordMatchResult } from '../../app/stats';
 import { getRoundStarter, type GameSetup, type Player } from '../../app/types';
-import { GameHeader, MatchResultToast, ScoreStrip, Tip } from '../../components/react-layout';
+import { GameHeader, GameStatus, MatchResultToast, ScoreStrip, Tip } from '../../components/react-layout';
 import {
   chooseTicBotMove,
   createTicState,
@@ -132,9 +132,7 @@ export function TicTacToePage({ setup, playerNames, onExit }: { setup: GameSetup
         turn={turn}
       />
       <section className="tic-board-wrap">
-        <div className="turn-label" role="status" aria-live="polite">
-          {status}
-        </div>
+        <GameStatus>{status}</GameStatus>
         <div className="tic-board" aria-label={t('ticBoard')}>
           {board.map((mark, index) => (
             <button

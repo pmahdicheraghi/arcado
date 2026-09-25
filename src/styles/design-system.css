@@ -149,6 +149,11 @@
   --game-accent-ink: #2b1419;
 }
 
+.theme-colorwar {
+  --game-accent: #ebd6a5;
+  --game-accent-ink: #231c12;
+}
+
 .theme-tic,
 .theme-memory,
 .theme-reaction,
@@ -156,7 +161,8 @@
 .theme-dots,
 .theme-othello,
 .theme-nim,
-.theme-tug {
+.theme-tug,
+.theme-colorwar {
   --game-tint: color-mix(in srgb, var(--game-accent) 15%, transparent);
   --game-wash: color-mix(in srgb, var(--game-accent) 8%, transparent);
   --game-border: color-mix(in srgb, var(--game-accent) 35%, transparent);

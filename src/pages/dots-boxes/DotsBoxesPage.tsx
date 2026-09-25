@@ -4,7 +4,7 @@ import { animateIn, motionEnabled } from '../../app/animation';
 import { useI18n } from '../../app/i18n';
 import { triggerHaptic } from '../../app/settings';
 import { getRoundStarter, type GameSetup, type Player } from '../../app/types';
-import { GameHeader, MatchResultToast, ScoreStrip, Tip } from '../../components/react-layout';
+import { GameHeader, GameStatus, MatchResultToast, ScoreStrip, Tip } from '../../components/react-layout';
 import { playMoveSound, playPairSound } from '../../app/sfx';
 import { recordMatchResult } from '../../app/stats';
 import {
@@ -183,9 +183,7 @@ export function DotsBoxesPage({ setup, playerNames, onExit }: { setup: GameSetup
         turn={turn}
       />
       <section className="dots-board-wrap">
-        <div className="dots-status" role="status" aria-live="polite">
-          {status}
-        </div>
+        <GameStatus>{status}</GameStatus>
         <div className={`dots-board turn-${turn.toLowerCase()}`} role="group" aria-label={t('dotsBoard')}>
           {renderBoard({
             edges,

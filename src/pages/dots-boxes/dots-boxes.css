@@ -2,20 +2,6 @@
   text-align: center;
 }
 
-.dots-status {
-  height: 44px;
-  display: grid;
-  place-items: center;
-  margin-bottom: 4px;
-  padding-inline: 8px;
-  overflow: hidden;
-  color: var(--game-accent, var(--acid));
-  font-family: var(--font-mono);
-  font-size: var(--text-label);
-  line-height: 1.45;
-  letter-spacing: 0.06em;
-}
-
 .dots-board {
   --dots-edge-overhang: 15px;
   --active-edge: var(--acid);

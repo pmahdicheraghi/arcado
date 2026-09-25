@@ -5,7 +5,7 @@ import { triggerHaptic } from '../../app/settings';
 import { playErrorSound, playPairSound, playTapSound } from '../../app/sfx';
 import { recordMatchResult } from '../../app/stats';
 import { getRoundStarter, type GameSetup, type Player } from '../../app/types';
-import { GameHeader, MatchResultToast, ScoreStrip, Tip } from '../../components/react-layout';
+import { GameHeader, GameStatus, MatchResultToast, ScoreStrip, Tip } from '../../components/react-layout';
 import {
   chooseMemoryBotCard,
   createMemoryDeck,
@@ -182,9 +182,7 @@ export function MemoryMatchPage({ setup, playerNames, onExit }: { setup: GameSet
         inGameUnit={t('pairsUnit')}
         turn={turn}
       />
-      <div className="memory-status" role="status" aria-live="polite">
-        {status}
-      </div>
+      <GameStatus>{status}</GameStatus>
       <section className="memory-grid" aria-label={t('memoryCards')}>
         {cards.map((card, index) => (
           <button

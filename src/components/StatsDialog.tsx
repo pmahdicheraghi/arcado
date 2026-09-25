@@ -26,6 +26,8 @@ function gameTitle(key: GameKey, t: ReturnType<typeof useI18n>['t']): string {
       return t('nim');
     case 'tug':
       return t('tugOfWar');
+    case 'colorwar':
+      return t('colorwar');
   }
 }
 
@@ -47,6 +49,8 @@ function gameIcon(key: GameKey): string {
       return 'flame';
     case 'tug':
       return 'zap';
+    case 'colorwar':
+      return 'spark';
   }
 }
 

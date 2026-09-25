@@ -3,7 +3,7 @@ import { animateIn, motionEnabled } from '../../app/animation';
 import { useI18n } from '../../app/i18n';
 import { triggerHaptic } from '../../app/settings';
 import { getRoundStarter, type GameSetup, type Player } from '../../app/types';
-import { GameHeader, MatchResultToast, ScoreStrip, Tip } from '../../components/react-layout';
+import { GameHeader, GameStatus, MatchResultToast, ScoreStrip, Tip } from '../../components/react-layout';
 import { playMoveSound, playPairSound } from '../../app/sfx';
 import { recordMatchResult } from '../../app/stats';
 import { chooseOthelloBotMove, countDiscs, createOthelloBoard, getValidMoves, makeMove, type OthelloCell } from './othello-logic';
@@ -218,9 +218,7 @@ export function OthelloPage({ setup, playerNames, onExit }: { setup: GameSetup; 
         turn={turn}
       />
       <section className="othello-board-wrap">
-        <div className="turn-label" role="status" aria-live="polite">
-          {status}
-        </div>
+        <GameStatus>{status}</GameStatus>
         <div className={`board-surface othello-board turn-${turn.toLowerCase()}`} role="group" aria-label={t('othelloBoard')}>
           {board.map((cell, index) => {
             const isValid = validMoves.includes(index);

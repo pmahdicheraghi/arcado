@@ -4,7 +4,7 @@ import { animateIn, motionEnabled } from '../../app/animation';
 import { useI18n } from '../../app/i18n';
 import { triggerHaptic } from '../../app/settings';
 import { getRoundStarter, type GameSetup, type Player } from '../../app/types';
-import { GameHeader, MatchResultToast, ScoreStrip, Tip } from '../../components/react-layout';
+import { GameHeader, GameStatus, MatchResultToast, ScoreStrip, Tip } from '../../components/react-layout';
 import { playMoveSound, playPairSound } from '../../app/sfx';
 import { recordMatchResult } from '../../app/stats';
 import {
@@ -184,9 +184,7 @@ export function ConnectFourPage({ setup, playerNames, onExit }: { setup: GameSet
         turn={turn}
       />
       <section className="connect-board-wrap">
-        <div className="turn-label" role="status" aria-live="polite">
-          {status}
-        </div>
+        <GameStatus>{status}</GameStatus>
         <div className={`board-surface connect-board turn-${turn.toLowerCase()}`} role="group" aria-label={t('connectBoard')}>
           {Array.from({ length: CONNECT_COLUMNS }, (_, column) => {
             const targetRow = getDropRow(board, column);

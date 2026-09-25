@@ -3,7 +3,7 @@ import anime from 'animejs';
 import { animateIn, motionEnabled } from '../../app/animation';
 import { triggerHaptic } from '../../app/settings';
 import type { GameSetup, Player } from '../../app/types';
-import { GameHeader, MatchResultToast, ScoreStrip, Tip } from '../../components/react-layout';
+import { GameHeader, GameStatus, MatchResultToast, ScoreStrip, Tip } from '../../components/react-layout';
 import './reaction-duel.css';
 import { useI18n } from '../../app/i18n';
 import { playErrorSound, playMoveSound, playPairSound } from '../../app/sfx';
@@ -176,9 +176,7 @@ export function ReactionDuelPage({ setup, playerNames, onExit }: { setup: GameSe
       />
       <ScoreStrip leftLabel={playerNames.X} leftMark="✦" rightLabel={playerNames.O} rightMark="✦" scores={scores} />
       <section className={`reaction-arena-wrap phase-${phase}`}>
-        <div className="turn-label" role="status" aria-live="assertive">
-          {status}
-        </div>
+        <GameStatus ariaLive="assertive">{status}</GameStatus>
         <div className={`reaction-arena phase-${phase}`} aria-label={t('playerTapButtons')}>
           <div className="reaction-signal">
             <div className={`signal-orb ${phase === 'go' ? 'signal-go' : ''}`} aria-hidden="true">
