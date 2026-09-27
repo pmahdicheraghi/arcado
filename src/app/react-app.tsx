@@ -401,7 +401,6 @@ function MenuPage({
 }) {
   const { language, t } = useI18n();
   const [isOnline, setIsOnline] = useState(() => navigator.onLine);
-  const headerAction = resolveHeaderAction({ isInstalled, canInstall, isUpdateAvailable });
 
   useEffect(() => {
     animateIn('.welcome > *, .game-card, .menu-footer');
@@ -426,24 +425,10 @@ function MenuPage({
           <span>{t('appName')}</span>
         </button>
         <div className="menu-topbar-actions">
-          {headerAction === 'install' && (
-            <button type="button" className="header-install-btn" onClick={onInstall}>
-              <Icon name="download" />
-              <span>{t('installApp')}</span>
-            </button>
-          )}
-          {headerAction === 'update' && (
-            <button type="button" className="header-install-btn header-update-btn" onClick={onUpdate} disabled={isUpdating}>
-              <Icon name="update" />
-              <span>{t(isUpdating ? 'updating' : 'updateNow')}</span>
-            </button>
-          )}
-          {headerAction === 'status' && (
-            <span className={`topbar-meta connection-status ${isOnline ? 'is-online' : 'is-offline'}`} role="status" aria-live="polite">
-              <span className="online-dot" aria-hidden="true" />
-              {t(isOnline ? 'online' : 'offline')}
-            </span>
-          )}
+          <span className={`topbar-meta connection-status ${isOnline ? 'is-online' : 'is-offline'}`} role="status" aria-live="polite">
+            <span className="online-dot" aria-hidden="true" />
+            {t(isOnline ? 'online' : 'offline')}
+          </span>
           <button
             type="button"
             className="icon-btn"

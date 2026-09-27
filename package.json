@@ -11,14 +11,20 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --write \"src/**/*.{ts,tsx,css}\" \"public/**/*.{js,webmanifest}\" \"*.{html,json,md,js}\"",
     "format:check": "prettier --check \"src/**/*.{ts,tsx,css}\" \"public/**/*.{js,webmanifest}\" \"*.{html,json,md,js}\"",
-    "test": "node --experimental-strip-types scripts/check-logic.ts"
+    "test": "node --experimental-strip-types scripts/check-logic.ts",
+    "cap:sync": "npm run build && cap sync android",
+    "cap:build": "cd android && gradlew.bat assembleRelease"
   },
   "dependencies": {
+    "@capacitor/core": "^8.5.2",
+    "@capacitor/splash-screen": "^8.0.2",
     "animejs": "3.2.2",
     "react": "^19.1.1",
     "react-dom": "^19.1.1"
   },
   "devDependencies": {
+    "@capacitor/android": "^8.5.2",
+    "@capacitor/cli": "^8.5.2",
     "@eslint/js": "^9.17.0",
     "@types/animejs": "^3.1.7",
     "@types/node": "^22.10.2",

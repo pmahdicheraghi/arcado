@@ -8,6 +8,7 @@
   width: min(100%, 365px);
   margin: auto;
   display: grid;
+  direction: ltr;
   grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: var(--board-gap);
   padding: 10px;

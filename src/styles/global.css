@@ -924,6 +924,7 @@ h1 em {
 }
 .card-visual.colorwar-visual {
   display: grid;
+  direction: ltr;
   grid-template-columns: repeat(5, 1fr);
   grid-template-rows: repeat(3, 1fr);
   gap: 4px;
