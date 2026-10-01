@@ -7,11 +7,7 @@ import {
   calculateNimSum,
   getOptimalNimMove,
 } from '../src/pages/nim/nim-logic.ts';
-import {
-  clampPosition,
-  checkTugWinner,
-  PULL_THRESHOLD,
-} from '../src/pages/tug-of-war/tug-of-war-logic.ts';
+import { clampPosition, checkTugWinner, PULL_THRESHOLD } from '../src/pages/tug-of-war/tug-of-war-logic.ts';
 import { resolveHeaderAction } from '../src/app/usePwaUpdate.ts';
 
 // 1. Nim Logic Checks
@@ -43,32 +39,32 @@ assert.strictEqual(checkTugWinner(PULL_THRESHOLD), 'O');
 assert.strictEqual(
   resolveHeaderAction({ isInstalled: false, canInstall: true, isUpdateAvailable: false }),
   'install',
-  'Uninstalled with prompt should show install button'
+  'Uninstalled with prompt should show install button',
 );
 assert.strictEqual(
   resolveHeaderAction({ isInstalled: true, canInstall: true, isUpdateAvailable: false }),
   'status',
-  'Installed app must never show install button'
+  'Installed app must never show install button',
 );
 assert.strictEqual(
   resolveHeaderAction({ isInstalled: true, canInstall: false, isUpdateAvailable: true }),
   'update',
-  'Installed with update available should show update button'
+  'Installed with update available should show update button',
 );
 assert.strictEqual(
   resolveHeaderAction({ isInstalled: true, canInstall: false, isUpdateAvailable: false }),
   'status',
-  'Installed without update should show online/offline status'
+  'Installed without update should show online/offline status',
 );
 assert.strictEqual(
   resolveHeaderAction({ isInstalled: false, canInstall: true, isUpdateAvailable: true }),
   'install',
-  'Uninstalled should show install even if update is ready'
+  'Uninstalled should show install even if update is ready',
 );
 assert.strictEqual(
   resolveHeaderAction({ isInstalled: false, canInstall: false, isUpdateAvailable: true }),
   'status',
-  'Uninstalled without prompt should fallback to status'
+  'Uninstalled without prompt should fallback to status',
 );
 
 // 4. Color War Logic Checks
@@ -89,7 +85,10 @@ import {
 // Initial board
 const cwBoard = createColorWarBoard();
 assert.strictEqual(cwBoard.length, 25, 'Board must have 25 cells');
-assert(cwBoard.every((c) => c.player === null && c.dots === 0), 'All cells must start empty');
+assert(
+  cwBoard.every((c) => c.player === null && c.dots === 0),
+  'All cells must start empty',
+);
 assert.deepStrictEqual(getOrthogonalNeighbors(0), [5, 1], 'Corner cell (0,0) neighbors should be (1,0) and (0,1)');
 
 // Corner trajectories
@@ -155,5 +154,58 @@ assert(botPlacement >= 0 && botPlacement < 25, 'Bot must choose a valid placemen
 
 const botBattleMove = chooseColorWarBotMove(boardAfterP2, 'battle', 'O', 'hard');
 assert.strictEqual(botBattleMove, 24, 'Bot O must choose its only disc at 24');
+
+// 5. Reaction Duel Logic Checks
+import { resolveReactionAttempt, getReactionMatchWinner } from '../src/pages/reaction-duel/reaction-duel-logic.ts';
+
+// False start
+assert.deepStrictEqual(
+  resolveReactionAttempt('waiting', 'X', 0, 500, false, false),
+  { kind: 'false-start', falseStart: 'X', winner: 'O' },
+  'Early tap in waiting phase should trigger false start',
+);
+
+// First reaction in go phase
+assert.deepStrictEqual(
+  resolveReactionAttempt('go', 'X', 1000, 1250, false, false),
+  { kind: 'reaction', reaction: 250, winner: 'X' },
+  'First tap in go phase should register reaction and award win',
+);
+
+// Duplicate tap in go phase
+assert.deepStrictEqual(
+  resolveReactionAttempt('go', 'X', 1000, 1300, true, false),
+  { kind: 'ignored' },
+  'Already reacted player tap should be ignored',
+);
+
+// Late tap in result phase (second player)
+assert.deepStrictEqual(
+  resolveReactionAttempt('result', 'O', 1000, 1310, false, false),
+  { kind: 'late-reaction', reaction: 310 },
+  'Second player tap in result phase should register late-reaction without changing winner',
+);
+
+// Second player already tapped in result phase
+assert.deepStrictEqual(
+  resolveReactionAttempt('result', 'O', 1000, 1350, true, false),
+  { kind: 'ignored' },
+  'Duplicate late tap should be ignored',
+);
+
+// Tap in result phase after false start
+assert.deepStrictEqual(
+  resolveReactionAttempt('result', 'O', 0, 600, false, true),
+  { kind: 'ignored' },
+  'Taps after false start should be ignored',
+);
+
+// Tap in idle phase
+assert.deepStrictEqual(resolveReactionAttempt('idle', 'X', 0, 0, false, false), { kind: 'ignored' }, 'Tap in idle phase should be ignored');
+
+// Match winner
+assert.strictEqual(getReactionMatchWinner({ X: 3, O: 2 }), 'X');
+assert.strictEqual(getReactionMatchWinner({ X: 1, O: 2 }), 'O');
+assert.strictEqual(getReactionMatchWinner({ X: 2, O: 2 }), 'draw');
 
 console.log('✓ All logic assertions passed successfully!');

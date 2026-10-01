@@ -1,4 +1,28 @@
 apply plugin: 'com.android.application'
+import groovy.json.JsonSlurper
+
+def packageJsonFile = file('../../package.json')
+def packageJson = packageJsonFile.exists() ? new JsonSlurper().parseText(packageJsonFile.text) : [:]
+def npmVersion = (packageJson.version ?: '1.0.0').toString()
+
+def parseVersionCode(String version) {
+    try {
+        def clean = version.tokenize('-')[0].tokenize('+')[0]
+        def parts = clean.tokenize('.').collect { it.toInteger() }
+        def major = parts.size() > 0 ? parts[0] : 0
+        def minor = parts.size() > 1 ? parts[1] : 0
+        def patch = parts.size() > 2 ? parts[2] : 0
+        return major * 10000 + minor * 100 + patch
+    } catch (Exception ignored) {
+        return 1
+    }
+}
+
+def computedVersionCode = parseVersionCode(npmVersion)
+def computedVersionName = npmVersion
+
+def appVersionCode = (findProperty('VERSION_CODE') ?: System.getenv('VERSION_CODE')) ? Integer.parseInt((findProperty('VERSION_CODE') ?: System.getenv('VERSION_CODE')).toString()) : computedVersionCode
+def appVersionName = (findProperty('VERSION_NAME') ?: System.getenv('VERSION_NAME')) ?: computedVersionName
 
 android {
     namespace = "ir.arcado.game"
@@ -7,8 +31,8 @@ android {
         applicationId "ir.arcado.game"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
+        versionCode appVersionCode
+        versionName appVersionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -68,4 +92,11 @@ try {
     }
 } catch(Exception e) {
     logger.info("google-services.json not found, google-services plugin not applied. Push Notifications won't work")
+}
+
+tasks.register('printVersion') {
+    doLast {
+        println "VERSION_NAME=${android.defaultConfig.versionName}"
+        println "VERSION_CODE=${android.defaultConfig.versionCode}"
+    }
 }

@@ -4,7 +4,8 @@ export type ReactionPhase = 'idle' | 'waiting' | 'go' | 'result';
 export type ReactionAttempt =
   | { kind: 'ignored' }
   | { kind: 'false-start'; falseStart: Player; winner: Player }
-  | { kind: 'reaction'; reaction: number; winner: Player };
+  | { kind: 'reaction'; reaction: number; winner: Player }
+  | { kind: 'late-reaction'; reaction: number };
 
 const BOT_REACTION_RANGES: Record<GameDifficulty, readonly [minimum: number, variance: number]> = {
   easy: [560, 360],
@@ -27,12 +28,19 @@ export function resolveReactionAttempt(
   goAt: number,
   attemptedAt: number,
   hasReacted = false,
+  isFalseStart = false,
 ): ReactionAttempt {
   if (phase === 'waiting') {
     return { kind: 'false-start', falseStart: player, winner: otherPlayer(player) };
   }
-  if (phase !== 'go' || hasReacted) return { kind: 'ignored' };
-  return { kind: 'reaction', reaction: Math.max(1, Math.round(attemptedAt - goAt)), winner: player };
+  if (hasReacted) return { kind: 'ignored' };
+  if (phase === 'go') {
+    return { kind: 'reaction', reaction: Math.max(1, Math.round(attemptedAt - goAt)), winner: player };
+  }
+  if (phase === 'result' && !isFalseStart && goAt > 0) {
+    return { kind: 'late-reaction', reaction: Math.max(1, Math.round(attemptedAt - goAt)) };
+  }
+  return { kind: 'ignored' };
 }
 
 export function getReactionMatchWinner(scores: Record<Player, number>): Player | 'draw' {

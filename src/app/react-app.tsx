@@ -753,9 +753,6 @@ function MenuPage({
         <span>
           <Icon name="spark" /> {t('footerTagline')}
         </span>
-        <span>
-          {t('version', { version: __APP_RELEASE__ })} / {t('byMahdi')}
-        </span>
       </footer>
     </main>
   );

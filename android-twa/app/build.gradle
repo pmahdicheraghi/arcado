@@ -14,11 +14,35 @@
  * limitations under the License.
  */
 
+import groovy.json.JsonSlurper
 import groovy.xml.MarkupBuilder
 
 plugins {
     id 'com.android.application'
 }
+
+def packageJsonFile = file('../../package.json')
+def packageJson = packageJsonFile.exists() ? new JsonSlurper().parseText(packageJsonFile.text) : [:]
+def npmVersion = (packageJson.version ?: '1.0.0').toString()
+
+def parseVersionCode(String version) {
+    try {
+        def clean = version.tokenize('-')[0].tokenize('+')[0]
+        def parts = clean.tokenize('.').collect { it.toInteger() }
+        def major = parts.size() > 0 ? parts[0] : 0
+        def minor = parts.size() > 1 ? parts[1] : 0
+        def patch = parts.size() > 2 ? parts[2] : 0
+        return major * 10000 + minor * 100 + patch
+    } catch (Exception ignored) {
+        return 1
+    }
+}
+
+def computedVersionCode = parseVersionCode(npmVersion)
+def computedVersionName = npmVersion
+
+def appVersionCode = (findProperty('VERSION_CODE') ?: System.getenv('VERSION_CODE')) ? Integer.parseInt((findProperty('VERSION_CODE') ?: System.getenv('VERSION_CODE')).toString()) : computedVersionCode
+def appVersionName = (findProperty('VERSION_NAME') ?: System.getenv('VERSION_NAME')) ?: computedVersionName
 
 def twaManifest = [
     applicationId: 'ir.arcado.game',
@@ -57,8 +81,8 @@ android {
         applicationId "ir.arcado.game"
         minSdkVersion 21
         targetSdkVersion 35
-        versionCode 1
-        versionName "1"
+        versionCode appVersionCode
+        versionName appVersionName
 
         // The name for the application
         resValue "string", "appName", twaManifest.name
@@ -210,4 +234,11 @@ dependencies {
     
         implementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.6.2'
     
+}
+
+tasks.register('printVersion') {
+    doLast {
+        println "VERSION_NAME=${android.defaultConfig.versionName}"
+        println "VERSION_CODE=${android.defaultConfig.versionCode}"
+    }
 }

@@ -26,10 +26,13 @@ export function ReactionDuelPage({ setup, playerNames, onExit }: { setup: GameSe
   const [winner, setWinner] = useState<Player | null>(null);
   const [falseStart, setFalseStart] = useState<Player | null>(null);
   const [round, setRound] = useState(1);
+  const [roundLocked, setRoundLocked] = useState(false);
   const goAt = useRef(0);
   const timer = useRef<number | null>(null);
   const botTimer = useRef<number | null>(null);
   const bestReactionRef = useRef<number | undefined>(undefined);
+  const matchRecorded = useRef(false);
+  const tapRef = useRef<(player: Player) => void>(() => {});
 
   useEffect(() => animateIn('.score-strip, .reaction-arena-wrap, .reaction-buttons, .tip'), []);
   useEffect(() => {
@@ -44,18 +47,14 @@ export function ReactionDuelPage({ setup, playerNames, onExit }: { setup: GameSe
       playMoveSound(false);
       goAt.current = performance.now();
       if (motionEnabled()) anime({ targets: '.signal-orb', scale: [0.8, 1.12, 1], duration: 360, easing: 'easeOutBack' });
+      if (mode === 'bot') {
+        botTimer.current = window.setTimeout(() => tapRef.current('O'), getBotReactionDelay(setup.difficulty));
+      }
     }, getReactionWaitDelay());
     return () => {
       if (timer.current) window.clearTimeout(timer.current);
     };
-  }, [phase]);
-  useEffect(() => {
-    if (phase !== 'go' || mode !== 'bot') return;
-    botTimer.current = window.setTimeout(() => tap('O'), getBotReactionDelay(setup.difficulty));
-    return () => {
-      if (botTimer.current) window.clearTimeout(botTimer.current);
-    };
-  }, [phase, mode]);
+  }, [phase, mode, setup.difficulty]);
 
   const stopTimers = () => {
     if (timer.current) window.clearTimeout(timer.current);
@@ -72,17 +71,33 @@ export function ReactionDuelPage({ setup, playerNames, onExit }: { setup: GameSe
     setReactions({});
     setWinner(null);
     setFalseStart(null);
+    setRoundLocked(false);
+    goAt.current = 0;
     triggerHaptic(5);
   };
 
   useEffect(() => {
-    if (phase !== 'result' || round >= setup.rounds) return;
-    const timeout = window.setTimeout(startRound, 1400);
+    if (phase !== 'result') return;
+    const timeout = window.setTimeout(() => {
+      if (round >= setup.rounds) {
+        setRoundLocked(true);
+        stopTimers();
+      } else {
+        startRound();
+      }
+    }, 1400);
     return () => window.clearTimeout(timeout);
   }, [phase, round, setup.rounds]);
 
   const tap = (player: Player) => {
-    const attempt = resolveReactionAttempt(phase, player, goAt.current, performance.now(), Boolean(reactions[player]));
+    const attempt = resolveReactionAttempt(
+      phase,
+      player,
+      goAt.current,
+      performance.now(),
+      reactions[player] !== undefined,
+      Boolean(falseStart),
+    );
     if (attempt.kind === 'false-start') {
       if (!(mode === 'bot' && player === 'O')) {
         playErrorSound();
@@ -92,16 +107,18 @@ export function ReactionDuelPage({ setup, playerNames, onExit }: { setup: GameSe
       setWinner(attempt.winner);
       setPhase('result');
       stopTimers();
-      const nextScores = { ...scores, [attempt.winner]: scores[attempt.winner] + 1 };
-      setScores(nextScores);
-      if (round >= setup.rounds) {
-        const matchWinner = getReactionMatchWinner(nextScores);
-        const outcome = matchWinner === 'draw' ? 'draw' : matchWinner === 'X' ? 'win' : 'loss';
-        recordMatchResult('reaction', outcome, {
-          reactionMs: bestReactionRef.current,
-          difficulty: mode === 'bot' ? setup.difficulty : undefined,
-        });
+      setScores((current) => ({ ...current, [attempt.winner]: current[attempt.winner] + 1 }));
+      return;
+    }
+    if (attempt.kind === 'late-reaction') {
+      if (player === 'X') {
+        bestReactionRef.current = Math.min(bestReactionRef.current ?? Infinity, attempt.reaction);
       }
+      if (!(mode === 'bot' && player === 'O')) {
+        playMoveSound(player === 'O');
+        triggerHaptic(15);
+      }
+      setReactions((current) => ({ ...current, [player]: attempt.reaction }));
       return;
     }
     if (attempt.kind !== 'reaction') return;
@@ -114,21 +131,30 @@ export function ReactionDuelPage({ setup, playerNames, onExit }: { setup: GameSe
     }
     setReactions((current) => ({ ...current, [player]: attempt.reaction }));
     setWinner(attempt.winner);
-    const nextScores = { ...scores, [attempt.winner]: scores[attempt.winner] + 1 };
-    setScores(nextScores);
+    setScores((current) => ({ ...current, [attempt.winner]: current[attempt.winner] + 1 }));
     setPhase('result');
-    stopTimers();
-    if (round >= setup.rounds) {
-      const matchWinner = getReactionMatchWinner(nextScores);
-      const outcome = matchWinner === 'draw' ? 'draw' : matchWinner === 'X' ? 'win' : 'loss';
-      recordMatchResult('reaction', outcome, {
-        reactionMs: bestReactionRef.current,
-        difficulty: mode === 'bot' ? setup.difficulty : undefined,
-      });
+    if (timer.current) {
+      window.clearTimeout(timer.current);
+      timer.current = null;
     }
   };
+  tapRef.current = tap;
 
-  const matchComplete = phase === 'result' && round >= setup.rounds;
+  const matchComplete =
+    phase === 'result' &&
+    round >= setup.rounds &&
+    (roundLocked || falseStart !== null || (reactions.X !== undefined && reactions.O !== undefined));
+
+  useEffect(() => {
+    if (!matchComplete || matchRecorded.current) return;
+    matchRecorded.current = true;
+    const finalWinner = getReactionMatchWinner(scores);
+    const outcome = finalWinner === 'draw' ? 'draw' : finalWinner === 'X' ? 'win' : 'loss';
+    recordMatchResult('reaction', outcome, {
+      reactionMs: bestReactionRef.current,
+      difficulty: mode === 'bot' ? setup.difficulty : undefined,
+    });
+  }, [matchComplete, scores, mode, setup.difficulty]);
   const playerName = (player: Player) => playerNames[player];
   const formatReaction = (reaction: number) =>
     `${new Intl.NumberFormat(language === 'fa' ? 'fa-IR' : 'en').format(reaction)} ${t('milliseconds')}`;
@@ -146,6 +172,9 @@ export function ReactionDuelPage({ setup, playerNames, onExit }: { setup: GameSe
             ? t('tappedEarly', { player: playerName(falseStart), winner: playerName(winner!) })
             : t('winsRound', { player: playerName(winner!) })
           : t('pressStart');
+  const canPlayerTap = (player: Player) =>
+    reactions[player] === undefined && (phase === 'waiting' || phase === 'go' || (phase === 'result' && !falseStart && !roundLocked));
+
   const label = (player: Player) =>
     phase === 'waiting'
       ? t('waitForGreen')
@@ -158,11 +187,20 @@ export function ReactionDuelPage({ setup, playerNames, onExit }: { setup: GameSe
           : phase === 'result'
             ? winner === player
               ? t('wins')
-              : t('noTap')
+              : reactions[player] !== undefined
+                ? t('lost')
+                : canPlayerTap(player)
+                  ? t('tapNowShort')
+                  : t('noTap')
             : t('ready');
   const actionLabel = (player: Player) =>
-    reactions[player] ? formatReaction(reactions[player]) : phase === 'waiting' ? t('ready') : phase === 'go' ? t('tap') : label(player);
-  const running = phase === 'waiting' || phase === 'go';
+    reactions[player] !== undefined
+      ? formatReaction(reactions[player]!)
+      : phase === 'waiting'
+        ? t('ready')
+        : phase === 'go' || (phase === 'result' && canPlayerTap(player))
+          ? t('tap')
+          : label(player);
 
   return (
     <main className="shell game-screen reaction-screen theme-reaction">
@@ -194,7 +232,7 @@ export function ReactionDuelPage({ setup, playerNames, onExit }: { setup: GameSe
               onKeyDown={(event) => {
                 if (event.key === 'Enter' || event.key === ' ') tap('X');
               }}
-              disabled={!running}
+              disabled={!canPlayerTap('X')}
             >
               <span>{playerNames.X}</span>
               <strong>{actionLabel('X')}</strong>
@@ -202,7 +240,7 @@ export function ReactionDuelPage({ setup, playerNames, onExit }: { setup: GameSe
             </button>
             <button
               type="button"
-              className={`reaction-player player-two ${mode === 'bot' ? 'is-bot' : ''} ${winner === 'O' ? 'is-winner' : ''}`}
+              className={`reaction-player player-two ${mode === 'bot' ? 'is-bot' : ''} ${winner === 'O' ? 'is-winner' : ''} ${falseStart === 'O' ? 'is-false-start' : ''}`}
               onPointerDown={(event) => {
                 event.preventDefault();
                 tap('O');
@@ -210,7 +248,7 @@ export function ReactionDuelPage({ setup, playerNames, onExit }: { setup: GameSe
               onKeyDown={(event) => {
                 if (event.key === 'Enter' || event.key === ' ') tap('O');
               }}
-              disabled={!running || mode === 'bot'}
+              disabled={!canPlayerTap('O') || mode === 'bot'}
             >
               <span>{playerNames.O}</span>
               <strong>{actionLabel('O')}</strong>
