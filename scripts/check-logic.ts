@@ -155,6 +155,34 @@ assert(botPlacement >= 0 && botPlacement < 25, 'Bot must choose a valid placemen
 const botBattleMove = chooseColorWarBotMove(boardAfterP2, 'battle', 'O', 'hard');
 assert.strictEqual(botBattleMove, 24, 'Bot O must choose its only disc at 24');
 
+// Test Rule 1: Rush frontline cell to 3 when enemy is not ahead
+const rushBoard = createColorWarBoard();
+rushBoard[0] = { player: 'O', dots: 2 }; // Safe backline cell
+rushBoard[6] = { player: 'O', dots: 2 }; // Frontline cell adjacent to 7
+rushBoard[7] = { player: 'X', dots: 2 }; // Enemy cell, not ahead (dots <= 2, dots < 3)
+for (let i = 0; i < 10; i++) {
+  const botRushMove = chooseColorWarBotMove(rushBoard, 'battle', 'O', 'hard');
+  assert.strictEqual(botRushMove, 6, 'Bot O must consistently rush frontline cell 6 to 3 instead of safe backline cell 0');
+}
+
+// Test Rule 1 edge case: Do NOT rush frontline cell if enemy is ahead
+const dangerBoard = createColorWarBoard();
+dangerBoard[0] = { player: 'O', dots: 2 }; // Safe backline cell
+dangerBoard[6] = { player: 'O', dots: 2 }; // Frontline cell adjacent to 7
+dangerBoard[7] = { player: 'X', dots: 3 }; // Enemy cell is ahead / ready to explode (dots 3)
+const botSafeMove = chooseColorWarBotMove(dangerBoard, 'battle', 'O', 'hard');
+assert.strictEqual(botSafeMove, 0, 'Bot O must not rush frontline cell 6 when enemy at 7 has 3 dots');
+
+// Test Rule 2: Don't explode near opponent if opponent can recapture the taken cell
+const trapBoard = createColorWarBoard();
+trapBoard[0] = { player: 'O', dots: 1 }; // Safe backline cell
+trapBoard[1] = { player: 'O', dots: 1 }; // Extra backline cell to keep disc count lead
+trapBoard[6] = { player: 'O', dots: 3 }; // Frontline ready to explode into 7
+trapBoard[7] = { player: 'X', dots: 2 }; // Enemy cell that 6 will take
+trapBoard[8] = { player: 'X', dots: 3 }; // Enemy ready to explode and recapture 7
+const botTrapMove = chooseColorWarBotMove(trapBoard, 'battle', 'O', 'hard');
+assert.notStrictEqual(botTrapMove, 6, 'Bot O must not explode into cell 7 when enemy at 8 can immediately take it back');
+
 // 5. Reaction Duel Logic Checks
 import { resolveReactionAttempt, getReactionMatchWinner } from '../src/pages/reaction-duel/reaction-duel-logic.ts';
 

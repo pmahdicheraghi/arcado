@@ -292,8 +292,16 @@ export function chooseColorWarBotMove(
     let score = (botDiscs - oppDiscs) * 20 + (botDots - oppDots) * 3 + totalExplosions * 4;
 
     if (difficulty === 'hard') {
+      const takenCells: number[] = [];
+      for (let i = 0; i < COLOR_WAR_CELL_COUNT; i++) {
+        if (board[i].player === opponent && finalBoard[i].player === botPlayer) {
+          takenCells.push(i);
+        }
+      }
+
       const oppMoves = getValidMoves(finalBoard, 'battle', opponent);
       let worstOpponentDamage = 0;
+      let canRecapture = false;
 
       for (const oppMove of oppMoves) {
         const oppTapped = applyBattleTap(finalBoard, oppMove);
@@ -301,13 +309,30 @@ export function chooseColorWarBotMove(
         const oppResultCounts = countDiscs(oppCascade.finalBoard);
         const oppFinalDiscs = botPlayer === 'X' ? oppResultCounts.O : oppResultCounts.X;
         const botFinalDiscs = botPlayer === 'X' ? oppResultCounts.X : oppResultCounts.O;
-        const damage = oppFinalDiscs - botFinalDiscs;
+        const damage = botDiscs - oppDiscs - (botFinalDiscs - oppFinalDiscs);
         if (damage > worstOpponentDamage) {
           worstOpponentDamage = damage;
+        }
+
+        if (takenCells.length > 0 && takenCells.some((idx) => oppCascade.finalBoard[idx].player === opponent)) {
+          canRecapture = true;
         }
       }
 
       score -= worstOpponentDamage * 25;
+      if (canRecapture) {
+        score -= 50;
+      }
+
+      // Frontline rush-to-3: charge adjacent cells towards 3 if enemy is not ahead
+      const currentDots = board[move].dots;
+      if (currentDots < 3) {
+        const neighbors = getOrthogonalNeighbors(move);
+        const enemyNeighbors = neighbors.filter((nIdx) => board[nIdx].player === opponent && board[nIdx].dots > 0);
+        if (enemyNeighbors.length > 0 && enemyNeighbors.every((nIdx) => board[nIdx].dots <= currentDots && board[nIdx].dots < 3)) {
+          score += currentDots === 2 ? 20 : 10;
+        }
+      }
     }
 
     if (score > bestScore) {
