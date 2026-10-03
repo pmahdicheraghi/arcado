@@ -358,22 +358,47 @@ function gameTitle(view: Exclude<View, 'menu' | 'settings' | 'stats'>, language:
   return translate(language, 'othello');
 }
 
-const COLOR_WAR_PREVIEW_CELLS: ReadonlyArray<{ player?: 'x' | 'o'; dots?: 1 | 2 | 3 }> = [
+const CONNECT_PREVIEW_SLOTS: ReadonlyArray<'x' | 'o' | null> = [
+  null, null, null, null, 'x', null, null,
+  null, null, null, 'x', 'o', null, null,
+  null, null, 'x', 'o', 'x', null, null,
+  null, 'x', 'o', 'o', 'o', null, null,
+];
+
+interface OthelloPreviewCell {
+  disc?: 'dark' | 'light';
+  hint?: boolean;
+}
+
+const OTHELLO_PREVIEW_CELLS: ReadonlyArray<OthelloPreviewCell> = [
+  {hint: true}, { hint: true }, { hint: true }, { hint: true }, { hint: true }, { hint: true },
+  {hint: true}, { hint: true }, { disc: 'dark' }, { disc: 'light' }, { hint: true }, { hint: true },
+  {hint: true}, { hint: true }, { disc: 'light' }, { disc: 'dark' }, { hint: true }, { hint: true },
+  {hint: true}, { hint: true }, { hint: true }, { hint: true }, { hint: true }, { hint: true },
+];
+
+interface ColorWarPreviewCell {
+  player?: 'x' | 'o';
+  dots?: 1 | 2 | 3;
+  shockwave?: boolean;
+}
+
+const COLOR_WAR_PREVIEW_CELLS: ReadonlyArray<ColorWarPreviewCell> = [
   {},
   { player: 'x', dots: 1 },
   { player: 'x', dots: 2 },
+  {},
+  { player: 'o', dots: 1 },
+  { player: 'x', dots: 2 },
+  { player: 'o', dots: 3, shockwave: true },
   {},
   { player: 'o', dots: 2 },
+  {},
+  {},
+  {},
   { player: 'x', dots: 3 },
-  { player: 'o', dots: 3 },
-  { player: 'x', dots: 1 },
-  {},
-  {},
-  {},
-  {},
-  { player: 'x', dots: 2 },
   { player: 'o', dots: 1 },
-  { player: 'o', dots: 3 },
+  {},
 ];
 
 function MenuPage({
@@ -482,13 +507,17 @@ function MenuPage({
           title={t('ticTacToe')}
           description={t('ticDescription')}
           visual={
-            <>
-              <span>×</span>
-              <span>○</span>
-              <span>×</span>
-              <span>○</span>
-              <span>×</span>
-            </>
+            <div className="tic-mini-board">
+              <span className="tic-mini-cell is-x">×</span>
+              <span className="tic-mini-cell" />
+              <span className="tic-mini-cell is-o">○</span>
+              <span className="tic-mini-cell" />
+              <span className="tic-mini-cell is-x">×</span>
+              <span className="tic-mini-cell" />
+              <span className="tic-mini-cell is-o">○</span>
+              <span className="tic-mini-cell" />
+              <span className="tic-mini-cell is-x">×</span>
+            </div>
           }
           firstMeta={
             <>
@@ -508,16 +537,16 @@ function MenuPage({
           title={t('memoryMatch')}
           description={t('memoryDescription')}
           visual={
-            <>
-              <span className="is-matched">✦</span>
-              <span>●</span>
-              <span>☀</span>
-              <span>⬟</span>
-              <span>✚</span>
-              <span className="is-matched">✦</span>
-              <span>◒</span>
-              <span>✿</span>
-            </>
+            <div className="memory-mini-grid">
+              <span className="memory-mini-card is-matched">✦</span>
+              <span className="memory-mini-card">●</span>
+              <span className="memory-mini-card">☀</span>
+              <span className="memory-mini-card">⬟</span>
+              <span className="memory-mini-card">✚</span>
+              <span className="memory-mini-card is-matched">✦</span>
+              <span className="memory-mini-card">◒</span>
+              <span className="memory-mini-card">✿</span>
+            </div>
           }
           firstMeta={
             <>
@@ -537,11 +566,12 @@ function MenuPage({
           title={t('reactionDuel')}
           description={t('reactionDescription')}
           visual={
-            <>
-              <span className="reaction-dot" />
-              <span className="reaction-wave" />
-              <span className="reaction-wave two" />
-            </>
+            <div className="reaction-mini-arena">
+              <span className="reaction-mini-wave two" />
+              <span className="reaction-mini-wave one" />
+              <div className="reaction-mini-orb">
+              </div>
+            </div>
           }
           firstMeta={
             <>
@@ -560,14 +590,13 @@ function MenuPage({
           number={t('alignment')}
           title={t('connectFour')}
           description={t('connectDescription')}
-          visual={Array.from({ length: 28 }, (_, index) => (
-            <span
-              className={
-                [3, 9, 15, 21].includes(index) ? 'connect-dot-one' : [10, 16, 17, 22, 23, 24].includes(index) ? 'connect-dot-two' : ''
-              }
-              key={index}
-            />
-          ))}
+          visual={
+            <div className="connect-mini-board">
+              {CONNECT_PREVIEW_SLOTS.map((slot, index) => (
+                <span key={index} className={`connect-mini-slot ${slot ? `is-${slot}` : ''}`} />
+              ))}
+            </div>
+          }
           firstMeta={
             <>
               <Icon name="grid" /> {t('fourToWin')}
@@ -585,11 +614,46 @@ function MenuPage({
           number={t('tactics')}
           title={t('dotsBoxes')}
           description={t('dotsDescription')}
-          visual={Array.from({ length: 16 }, (_, index) => (
-            <span className={`dots-preview-dot dot-${index}`} key={index}>
-              <i />
-            </span>
-          ))}
+          visual={
+            <svg className="dots-mini-svg" viewBox="0 0 180 116" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <line x1="10" y1="10" x2="50" y2="10" className="dots-mini-edge is-active" />
+              <line x1="50" y1="10" x2="90" y2="10" className="dots-mini-edge is-active" />
+              <line x1="90" y1="10" x2="130" y2="10" className="dots-mini-edge" />
+              <line x1="130" y1="10" x2="170" y2="10" className="dots-mini-edge" />
+              <line x1="10" y1="42" x2="50" y2="42" className="dots-mini-edge is-active" />
+              <line x1="50" y1="42" x2="90" y2="42" className="dots-mini-edge" />
+              <line x1="90" y1="42" x2="130" y2="42" className="dots-mini-edge is-active" />
+              <line x1="130" y1="42" x2="170" y2="42" className="dots-mini-edge" />
+              <line x1="10" y1="74" x2="50" y2="74" className="dots-mini-edge" />
+              <line x1="50" y1="74" x2="90" y2="74" className="dots-mini-edge is-active" />
+              <line x1="90" y1="74" x2="130" y2="74" className="dots-mini-edge is-active" />
+              <line x1="130" y1="74" x2="170" y2="74" className="dots-mini-edge is-active" />
+              <line x1="10" y1="106" x2="50" y2="106" className="dots-mini-edge is-active" />
+              <line x1="50" y1="106" x2="90" y2="106" className="dots-mini-edge" />
+              <line x1="90" y1="106" x2="130" y2="106" className="dots-mini-edge is-active" />
+              <line x1="130" y1="106" x2="170" y2="106" className="dots-mini-edge is-active" />
+              <line x1="10" y1="10" x2="10" y2="42" className="dots-mini-edge is-active" />
+              <line x1="50" y1="10" x2="50" y2="42" className="dots-mini-edge is-active" />
+              <line x1="90" y1="10" x2="90" y2="42" className="dots-mini-edge is-active" />
+              <line x1="130" y1="10" x2="130" y2="42" className="dots-mini-edge" />
+              <line x1="170" y1="10" x2="170" y2="42" className="dots-mini-edge" />
+              <line x1="10" y1="42" x2="10" y2="74" className="dots-mini-edge" />
+              <line x1="50" y1="42" x2="50" y2="74" className="dots-mini-edge" />
+              <line x1="90" y1="42" x2="90" y2="74" className="dots-mini-edge is-active" />
+              <line x1="130" y1="42" x2="130" y2="74" className="dots-mini-edge is-active" />
+              <line x1="170" y1="42" x2="170" y2="74" className="dots-mini-edge is-active" />
+              <line x1="10" y1="74" x2="10" y2="106" className="dots-mini-edge is-active" />
+              <line x1="50" y1="74" x2="50" y2="106" className="dots-mini-edge" />
+              <line x1="90" y1="74" x2="90" y2="106" className="dots-mini-edge" />
+              <line x1="130" y1="74" x2="130" y2="106" className="dots-mini-edge is-active" />
+              <line x1="170" y1="74" x2="170" y2="106" className="dots-mini-edge is-active" />
+              {[10, 42, 74, 106].map((y) =>
+                [10, 50, 90, 130, 170].map((x) => (
+                  <circle key={`${x}-${y}`} cx={x} cy={y} r="2.8" className="dots-mini-dot" />
+                ))
+              )}
+            </svg>
+          }
           firstMeta={
             <>
               <Icon name="grid" /> {t('nineBoxes')}
@@ -607,12 +671,16 @@ function MenuPage({
           number={t('territory')}
           title={t('othello')}
           description={t('othelloDescription')}
-          visual={Array.from({ length: 24 }, (_, index) => (
-            <span
-              className={[7, 8, 14].includes(index) ? 'othello-dot-dark' : [9, 15, 16].includes(index) ? 'othello-dot-light' : ''}
-              key={index}
-            />
-          ))}
+          visual={
+            <div className="othello-mini-board">
+              {OTHELLO_PREVIEW_CELLS.map((cell, index) => (
+                <span key={index} className="othello-mini-cell">
+                  {cell.disc && <i className={`othello-mini-disc is-${cell.disc}`} />}
+                  {cell.hint && <i className="othello-mini-hint" />}
+                </span>
+              ))}
+            </div>
+          }
           firstMeta={
             <>
               <Icon name="grid" /> {t('sixtyFourTiles')}
@@ -631,60 +699,24 @@ function MenuPage({
           title={t('nim')}
           description={t('nimDescription')}
           visual={
-            <div className="nim-rack-art">
-              <div className="nim-art-row">
-                <div className="nim-art-match is-lit">
-                  <i />
-                  <b />
-                </div>
-                <div className="nim-art-match">
-                  <i />
-                  <b />
-                </div>
-                <div className="nim-art-match">
-                  <i />
-                  <b />
-                </div>
+            <div className="nim-mini-board">
+              <div className="nim-mini-row">
+                <span className="nim-mini-match"><i /><b /></span>
+                <span className="nim-mini-match"><i /><b /></span>
+                <span className="nim-mini-match"><i /><b /></span>
               </div>
-              <div className="nim-art-row">
-                <div className="nim-art-match">
-                  <i />
-                  <b />
-                </div>
-                <div className="nim-art-match is-lit">
-                  <i />
-                  <b />
-                </div>
-                <div className="nim-art-match">
-                  <i />
-                  <b />
-                </div>
-                <div className="nim-art-match">
-                  <i />
-                  <b />
-                </div>
+              <div className="nim-mini-row">
+                <span className="nim-mini-match"><i /><b /></span>
+                <span className="nim-mini-match is-staged"><i /><b /></span>
+                <span className="nim-mini-match"><i /><b /></span>
+                <span className="nim-mini-match"><i /><b /></span>
               </div>
-              <div className="nim-art-row">
-                <div className="nim-art-match">
-                  <i />
-                  <b />
-                </div>
-                <div className="nim-art-match">
-                  <i />
-                  <b />
-                </div>
-                <div className="nim-art-match is-lit">
-                  <i />
-                  <b />
-                </div>
-                <div className="nim-art-match">
-                  <i />
-                  <b />
-                </div>
-                <div className="nim-art-match is-lit">
-                  <i />
-                  <b />
-                </div>
+              <div className="nim-mini-row">
+                <span className="nim-mini-match"><i /><b /></span>
+                <span className="nim-mini-match"><i /><b /></span>
+                <span className="nim-mini-match"><i /><b /></span>
+                <span className="nim-mini-match"><i /><b /></span>
+                <span className="nim-mini-match"><i /><b /></span>
               </div>
             </div>
           }
@@ -706,13 +738,15 @@ function MenuPage({
           title={t('tugOfWar')}
           description={t('tugDescription')}
           visual={
-            <div className="tug-card-visual-inner">
-              <div className="tug-card-rope-track">
-                <div className="tug-card-rope-line" />
-                <div className="tug-card-center-knot">
+            <div className="tug-mini-track">
+              <span className="tug-mini-anchor is-left" />
+              <div className="tug-mini-rope">
+                <span className="tug-mini-tick" />
+                <div className="tug-mini-knot">
                   <span>✦</span>
                 </div>
               </div>
+              <span className="tug-mini-anchor is-right" />
             </div>
           }
           firstMeta={
@@ -732,9 +766,22 @@ function MenuPage({
           number={t('chainReaction')}
           title={t('colorwar')}
           description={t('colorwarDescription')}
-          visual={COLOR_WAR_PREVIEW_CELLS.map((cell, index) => (
-            <span key={index}>{cell.player && <i className={`${cell.player} d${cell.dots}`} />}</span>
-          ))}
+          visual={
+            <div className="colorwar-mini-board">
+              {COLOR_WAR_PREVIEW_CELLS.map((cell, index) => (
+                <span key={index} className="colorwar-mini-cell">
+                  {cell.dots ? (
+                    <i className={`colorwar-mini-disc player-${cell.player} pips-${cell.dots}`}>
+                      {Array.from({ length: cell.dots }).map((_, p) => (
+                        <b key={p} className="colorwar-mini-pip" />
+                      ))}
+                    </i>
+                  ) : null}
+                  {cell.shockwave && <b className="colorwar-mini-shockwave" />}
+                </span>
+              ))}
+            </div>
+          }
           firstMeta={
             <>
               <Icon name="grid" /> {t('twentyFiveCells')}

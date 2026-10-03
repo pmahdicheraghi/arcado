@@ -315,7 +315,7 @@ const fa: Record<TranslationKey, string> = {
   settings: 'تنظیمات',
   yourArcade: 'شخصی‌سازی بازی',
   makeIt: 'تنظیمات را',
-  yours: 'تغییر بدید.',
+  yours: 'شخصی‌سازی کنید.',
   settingsIntro: 'گزینه‌های صدا، لرزش، ظاهر و زبان بازی.',
   gamePreferences: 'تنظیمات عمومی',
   animations: 'پویانمایی‌ها',

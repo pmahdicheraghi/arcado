@@ -636,356 +636,405 @@ h1 em {
 .card-visual {
   position: absolute;
   inset: 0;
-  opacity: 0.27;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 10px 60px;
+  opacity: 0.28;
   pointer-events: none;
+  z-index: 1;
+  overflow: hidden;
+  direction: ltr;
+  unicode-bidi: isolate;
+  text-align: left;
+  transition: opacity var(--duration-normal) var(--ease-standard);
+}
+.game-card:hover .card-visual,
+.game-card:focus-visible .card-visual {
+  opacity: 0.44;
 }
 .game-card .game-number {
   color: var(--game-accent-ink);
   opacity: 0.68;
 }
-.tic-visual {
-  font-family: var(--font-mono);
-  font-size: 106px;
-  line-height: 0.75;
+
+/* Tic-Tac-Toe: Oversized, tilted, classic 4-line hash grid with big bold X and O, NO background tile boxes */
+.tic-mini-board {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, 56px);
+  grid-template-rows: repeat(3, 56px);
+  transform: rotate(-9deg) scale(1.35);
+  transform-origin: center center;
+}
+.tic-mini-cell {
+  display: flex;
   align-items: center;
-  justify-items: center;
-  padding: 30px 10px 74px;
-  transform: rotate(-8deg);
-}
-.tic-visual span:nth-child(2),
-.tic-visual span:nth-child(4) {
-  color: var(--game-accent-ink);
-  opacity: 0.85;
-}
-.card-visual.memory-visual {
-  opacity: 0.62;
-  display: grid;
-  grid-template-columns: repeat(4, 64px);
-  grid-template-rows: repeat(2, 64px);
-  gap: 7px;
-  align-content: center;
   justify-content: center;
-  padding: 14px 16px 62px;
+  background: transparent;
+  color: var(--game-accent-ink);
   font-family: var(--font-mono);
-  transform: rotate(5deg) scale(1.02);
+  font-size: 42px;
+  font-weight: 800;
+  line-height: 1;
 }
-.memory-visual span {
-  width: 64px;
-  height: 64px;
+.tic-mini-cell:nth-child(1),
+.tic-mini-cell:nth-child(2),
+.tic-mini-cell:nth-child(4),
+.tic-mini-cell:nth-child(5) {
+  border-right: 3px solid color-mix(in srgb, var(--game-accent-ink) 50%, transparent);
+  border-bottom: 3px solid color-mix(in srgb, var(--game-accent-ink) 50%, transparent);
+}
+.tic-mini-cell:nth-child(3),
+.tic-mini-cell:nth-child(6) {
+  border-bottom: 3px solid color-mix(in srgb, var(--game-accent-ink) 50%, transparent);
+}
+.tic-mini-cell:nth-child(7),
+.tic-mini-cell:nth-child(8) {
+  border-right: 3px solid color-mix(in srgb, var(--game-accent-ink) 50%, transparent);
+}
+.tic-mini-cell.is-x {
+  color: var(--game-accent-ink);
+}
+.tic-mini-cell.is-o {
+  color: color-mix(in srgb, var(--game-accent-ink) 65%, transparent);
+}
+
+/* Memory Match: Oversized, tilted cards with iconic arcade symbols, matching old style */
+.memory-mini-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 56px);
+  grid-template-rows: repeat(2, 56px);
+  gap: 8px;
+  transform: rotate(6deg) scale(1.25);
+  transform-origin: center center;
+}
+.memory-mini-card {
+  width: 56px;
+  height: 56px;
   display: grid;
   place-items: center;
   border-radius: var(--radius-sm);
   border: 1.5px solid var(--game-accent-ink);
-  background: color-mix(in srgb, var(--game-accent-ink) 18%, transparent);
+  background: color-mix(in srgb, var(--game-accent-ink) 14%, transparent);
   color: var(--game-accent-ink);
   font-size: 24px;
   line-height: 1;
 }
-.memory-visual span.is-matched {
+.memory-mini-card.is-matched {
   background: var(--game-accent-ink);
   color: var(--game-accent);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
 }
-.reaction-visual {
+
+/* Reaction Duel: Oversized signal orb, and radiating shockwave rings */
+.reaction-mini-arena {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  width: 320px;
+  height: 200px;
+  transform: rotate(-6deg) scale(1.2);
+  transform-origin: center center;
+}
+.reaction-mini-orb {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 68px;
+  height: 68px;
+  border-radius: var(--radius-round);
+  border: 4px solid var(--game-accent-ink);
+  background: var(--game-accent-ink);
+  color: var(--game-accent);
   display: grid;
   place-items: center;
-  opacity: 0.35;
-}
-.reaction-dot {
-  width: 60px;
-  height: 60px;
-  background: var(--ink);
-  border: 11px solid var(--orange);
-  border-radius: var(--radius-round);
   box-shadow:
-    0 0 0 17px color-mix(in srgb, var(--ink) 35%, transparent),
-    0 0 0 34px color-mix(in srgb, var(--orange) 15%, transparent);
+    0 0 0 14px color-mix(in srgb, var(--game-accent-ink) 25%, transparent),
+    0 0 0 28px color-mix(in srgb, var(--game-accent-ink) 12%, transparent);
+  z-index: 3;
 }
-.reaction-wave {
+.reaction-mini-orb .icon {
+  width: 32px;
+  height: 32px;
+}
+.reaction-mini-wave {
   position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: var(--radius-round);
+  border: 2px solid var(--game-accent-ink);
+  pointer-events: none;
+}
+.reaction-mini-wave.one {
   width: 180px;
   height: 180px;
-  border: var(--border-strong) solid var(--orange);
-  border-radius: var(--radius-round);
-}
-.reaction-wave.two {
-  width: 280px;
-  height: 280px;
   opacity: 0.6;
+  border-width: 2.5px;
 }
-.connect-visual {
+.reaction-mini-wave.two {
+  width: 290px;
+  height: 290px;
+  opacity: 0.35;
+  border-width: 2px;
+}
+
+/* Connect Four: Free-floating disc slots & diagonal 4-in-a-row discs, NO background board slab */
+.connect-mini-board {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  grid-template-rows: repeat(4, 1fr);
+  grid-template-columns: repeat(7, 26px);
+  grid-template-rows: repeat(4, 26px);
   gap: 7px;
-  padding: 24px 18px 86px;
-  transform: rotate(-5deg) scale(1.06);
-  opacity: 0.38;
+  transform: rotate(-7deg) scale(1.35);
+  transform-origin: center center;
 }
-.connect-visual span {
-  aspect-ratio: 1;
-  align-self: center;
+.connect-mini-slot {
+  width: 26px;
+  height: 26px;
   border-radius: var(--radius-round);
-  background: color-mix(in srgb, var(--game-accent-ink) 68%, transparent);
-  box-shadow: var(--shadow-card-inset);
+  border: 2px solid color-mix(in srgb, var(--game-accent-ink) 35%, transparent);
+  background: transparent;
 }
-.connect-visual .connect-dot-one {
-  background: var(--acid);
-}
-.connect-visual .connect-dot-two {
-  background: var(--orange);
-}
-.dots-visual {
-  display: grid;
-  direction: ltr;
-  grid-template-columns: repeat(4, 1fr);
-  grid-template-rows: repeat(4, 1fr);
-  align-items: center;
-  justify-items: center;
-  padding: 25px 26px 87px;
-  transform: rotate(-6deg);
-  opacity: 0.46;
-  unicode-bidi: isolate;
-}
-.dots-preview-dot {
-  width: 100%;
-  height: 100%;
-  position: relative;
-}
-.dots-preview-dot i {
-  width: 14px;
-  height: 14px;
-  position: absolute;
-  z-index: 2;
-  top: 50%;
-  left: 50%;
-  border-radius: var(--radius-round);
+.connect-mini-slot.is-x {
   background: var(--game-accent-ink);
-  transform: translate(-50%, -50%);
+  border-color: var(--game-accent-ink);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
-.dots-preview-dot:not(:nth-child(4n))::after {
-  content: '';
-  width: 100%;
-  height: 4px;
-  position: absolute;
-  z-index: 1;
-  top: 50%;
-  left: 50%;
-  border-radius: var(--radius-pill);
-  background: currentColor;
-  transform: translateY(-50%);
+.connect-mini-slot.is-o {
+  background: color-mix(in srgb, var(--game-accent-ink) 50%, transparent);
+  border-color: color-mix(in srgb, var(--game-accent-ink) 50%, transparent);
 }
-.dots-preview-dot:nth-child(-n + 12)::before {
-  content: '';
-  width: 4px;
-  height: 100%;
-  position: absolute;
-  z-index: 1;
-  top: 50%;
-  left: 50%;
-  border-radius: var(--radius-pill);
-  background: currentColor;
-  transform: translateX(-50%);
+
+/* Dots & Boxes: Crisp dots and low-opacity lines across a rectangular 5x4 matrix */
+.dots-mini-svg {
+  width: 210px;
+  height: 135px;
+  transform: rotate(-6deg) scale(1.25);
+  transform-origin: center center;
 }
-.dots-preview-dot:nth-child(3n)::after,
-.dots-preview-dot:nth-child(5n)::before {
-  color: var(--acid);
+.dots-mini-edge {
+  stroke: color-mix(in srgb, var(--game-accent-ink) 14%, transparent);
+  stroke-width: 1.5;
+  stroke-linecap: round;
 }
-.othello-visual {
+.dots-mini-edge.is-active {
+  stroke: color-mix(in srgb, var(--game-accent-ink) 48%, transparent);
+  stroke-width: 2.5;
+}
+.dots-mini-dot {
+  fill: color-mix(in srgb, var(--game-accent-ink) 70%, transparent);
+}
+
+/* Othello: Free-floating reversible discs with expanded 10-hint dot field */
+.othello-mini-board {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  grid-template-rows: repeat(4, 1fr);
-  gap: 7px;
-  padding: 24px 18px 86px;
-  transform: rotate(5deg) scale(1.04);
-  opacity: 0.4;
+  grid-template-columns: repeat(6, 32px);
+  grid-template-rows: repeat(4, 32px);
+  gap: 6px;
+  transform: rotate(7deg) scale(1.3);
+  transform-origin: center center;
 }
-.othello-visual span {
-  aspect-ratio: 1;
+.othello-mini-cell {
+  display: grid;
+  place-items: center;
+  background: transparent;
+}
+.othello-mini-disc {
+  width: 28px;
+  height: 28px;
   border-radius: var(--radius-round);
+}
+.othello-mini-disc.is-dark {
+  background: var(--game-accent-ink);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+.othello-mini-disc.is-light {
   background: color-mix(in srgb, var(--game-accent-ink) 25%, transparent);
-  box-shadow: var(--shadow-card-inset-soft);
+  border: 2px solid var(--game-accent-ink);
 }
-.othello-visual .othello-dot-dark {
-  background: var(--acid);
+.othello-mini-hint {
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-round);
+  border: 1.5px solid color-mix(in srgb, var(--game-accent-ink) 65%, transparent);
+  background: color-mix(in srgb, var(--game-accent-ink) 15%, transparent);
 }
-.othello-visual .othello-dot-light {
-  background: var(--orange);
-}
-.card-visual.nim-visual {
-  opacity: 0.68;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 16px 18px 78px;
-  transform: rotate(-6deg) scale(1.05);
-}
-.nim-rack-art {
+
+/* Nim: Oversized matchsticks in 3 rows, lifted staged match, NO enclosing board box */
+.nim-mini-board {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
-  width: 100%;
-  max-width: 240px;
+  gap: 12px;
+  transform: rotate(-6deg) scale(1.35);
+  transform-origin: center center;
 }
-.nim-art-row {
+.nim-mini-row {
   display: flex;
   align-items: flex-end;
-  justify-content: center;
-  gap: 12px;
+  gap: 14px;
 }
-.nim-art-match {
+.nim-mini-match {
   display: flex;
   flex-direction: column;
   align-items: center;
-  position: relative;
+  transition: transform var(--duration-fast) var(--ease-standard);
 }
-.nim-art-match i {
-  display: block;
-  width: 13px;
-  height: 15px;
-  border-radius: 50% 50% 45% 45%;
+.nim-mini-match.is-staged {
+  transform: translateY(-8px);
+}
+.nim-mini-match i {
+  width: 11px;
+  height: 14px;
+  border-radius: 6px 6px 4px 4px;
   background: var(--game-accent-ink);
-  margin-bottom: -2px;
-  z-index: 1;
+  margin-bottom: -1px;
 }
-.nim-art-match.is-lit i {
-  background: color-mix(in srgb, var(--acid) 85%, transparent);
+.nim-mini-match.is-staged i {
+  opacity: 0.7;
 }
-.nim-art-match b {
-  display: block;
-  width: 7px;
-  height: 36px;
-  background: color-mix(in srgb, var(--game-accent-ink) 85%, transparent);
+.nim-mini-match b {
+  width: 5px;
+  height: 32px;
   border-radius: 0 0 2px 2px;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  background: color-mix(in srgb, var(--game-accent-ink) 70%, transparent);
 }
-.nim-art-row:nth-child(2) .nim-art-match b {
-  height: 42px;
+.nim-mini-row:nth-child(2) .nim-mini-match b {
+  height: 38px;
 }
-.nim-art-row:nth-child(3) .nim-art-match b {
-  height: 48px;
+.nim-mini-row:nth-child(3) .nim-mini-match b {
+  height: 44px;
 }
-.card-visual.tug-visual {
-  opacity: 0.72;
+
+/* Tug of War: Oversized dynamic rope track with braided texture and offset knot */
+.tug-mini-track {
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 20px 16px 82px;
-}
-.tug-card-visual-inner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  width: 100%;
-  max-width: 320px;
+  width: 280px;
   position: relative;
-  transform: rotate(-6deg) scale(1.05);
+  padding: 0 10px;
+  transform: rotate(-7deg) scale(1.25);
+  transform-origin: center center;
 }
-.tug-card-rope-track {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex: 1;
-  height: 60px;
-}
-.tug-card-rope-line {
-  width: 100%;
-  height: 9px;
+.tug-mini-anchor {
+  width: 6px;
+  height: 36px;
   border-radius: var(--radius-pill);
-  background: var(--game-accent-ink);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+  background: color-mix(in srgb, var(--game-accent-ink) 40%, transparent);
+}
+.tug-mini-rope {
+  flex: 1;
+  height: 9px;
+  margin: 0 6px;
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--game-accent-ink) 65%, transparent);
   background-image: repeating-linear-gradient(
     45deg,
     transparent,
-    transparent 6px,
-    rgba(255, 255, 255, 0.22) 6px,
-    rgba(255, 255, 255, 0.22) 11px
+    transparent 5px,
+    rgba(255, 255, 255, 0.25) 5px,
+    rgba(255, 255, 255, 0.25) 10px
   );
-}
-.tug-card-center-knot {
-  position: absolute;
-  width: 22px;
-  height: 22px;
-  border-radius: var(--radius-round);
-  background: var(--game-accent);
-  color: var(--game-accent-ink);
+  position: relative;
   display: flex;
   align-items: center;
-  justify-content: center;
-  font-size: 10px;
-  font-weight: 800;
-  border: 2px solid var(--game-accent-ink);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
-  z-index: 2;
 }
-.card-visual.colorwar-visual {
+.tug-mini-tick {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 3px;
+  height: 24px;
+  background: color-mix(in srgb, var(--game-accent-ink) 50%, transparent);
+}
+.tug-mini-knot {
+  position: absolute;
+  left: 38%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-round);
+  background: var(--game-accent-ink);
+  color: var(--game-accent);
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  font-weight: 800;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Color War: Free-floating discs with authentic 1-3 pips and shockwave, NO background board or cell boxes */
+.colorwar-mini-board {
   display: grid;
   direction: ltr;
-  grid-template-columns: repeat(5, 1fr);
-  grid-template-rows: repeat(3, 1fr);
-  gap: 4px;
-  padding: 36px 26px 84px;
-  transform: rotate(-4deg) scale(1.04);
-  opacity: 0.72;
+  grid-template-columns: repeat(5, 34px);
+  grid-template-rows: repeat(3, 34px);
+  gap: 6px;
+  transform: rotate(-6deg) scale(1.3);
+  transform-origin: center center;
 }
-.colorwar-visual span {
-  aspect-ratio: 1;
+.colorwar-mini-cell {
+  display: grid;
+  place-items: center;
+  position: relative;
+  background: transparent;
+}
+.colorwar-mini-disc {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-round);
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  position: relative;
+  background: var(--game-accent-ink);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
-.colorwar-visual span:empty::after {
-  content: '';
+.colorwar-mini-disc.player-o {
+  background: color-mix(in srgb, var(--game-accent-ink) 65%, transparent);
+}
+.colorwar-mini-pip {
+  position: absolute;
   width: 4px;
   height: 4px;
   border-radius: var(--radius-round);
-  background: color-mix(in srgb, var(--game-accent-ink) 25%, transparent);
+  background: var(--game-accent);
+  transform: translate(-50%, -50%);
 }
-.colorwar-visual span i {
-  width: 36px;
-  height: 36px;
+.colorwar-mini-disc.pips-1 .colorwar-mini-pip {
+  top: 50%;
+  left: 50%;
+}
+.colorwar-mini-disc.pips-2 .colorwar-mini-pip:nth-child(1) {
+  top: 50%;
+  left: 35%;
+}
+.colorwar-mini-disc.pips-2 .colorwar-mini-pip:nth-child(2) {
+  top: 50%;
+  left: 65%;
+}
+.colorwar-mini-disc.pips-3 .colorwar-mini-pip:nth-child(1) {
+  top: 62%;
+  left: 33%;
+}
+.colorwar-mini-disc.pips-3 .colorwar-mini-pip:nth-child(2) {
+  top: 62%;
+  left: 67%;
+}
+.colorwar-mini-disc.pips-3 .colorwar-mini-pip:nth-child(3) {
+  top: 36%;
+  left: 50%;
+}
+.colorwar-mini-shockwave {
+  position: absolute;
+  inset: -5px;
   border-radius: var(--radius-round);
-  display: block;
-  box-shadow: 0 2px 7px rgba(0, 0, 0, 0.22);
-}
-.colorwar-visual span i.x {
-  background: var(--acid);
-}
-.colorwar-visual span i.o {
-  background: var(--orange);
-}
-.colorwar-visual span i.x.d1 {
-  background: radial-gradient(circle 2.5px at 50% 50%, #141f1a 98%, transparent 100%), var(--acid);
-}
-.colorwar-visual span i.o.d1 {
-  background: radial-gradient(circle 2.5px at 50% 50%, #141f1a 98%, transparent 100%), var(--orange);
-}
-.colorwar-visual span i.x.d2 {
-  background:
-    radial-gradient(circle 2.2px at 37% 50%, #141f1a 98%, transparent 100%),
-    radial-gradient(circle 2.2px at 63% 50%, #141f1a 98%, transparent 100%), var(--acid);
-}
-.colorwar-visual span i.o.d2 {
-  background:
-    radial-gradient(circle 2.2px at 37% 50%, #141f1a 98%, transparent 100%),
-    radial-gradient(circle 2.2px at 63% 50%, #141f1a 98%, transparent 100%), var(--orange);
-}
-.colorwar-visual span i.x.d3 {
-  background:
-    radial-gradient(circle 2.2px at 50% 36%, #141f1a 98%, transparent 100%),
-    radial-gradient(circle 2.2px at 38% 57%, #141f1a 98%, transparent 100%),
-    radial-gradient(circle 2.2px at 62% 57%, #141f1a 98%, transparent 100%), var(--acid);
-}
-.colorwar-visual span i.o.d3 {
-  background:
-    radial-gradient(circle 2.2px at 50% 36%, #141f1a 98%, transparent 100%),
-    radial-gradient(circle 2.2px at 38% 57%, #141f1a 98%, transparent 100%),
-    radial-gradient(circle 2.2px at 62% 57%, #141f1a 98%, transparent 100%), var(--orange);
+  border: 1.5px dashed var(--game-accent-ink);
+  opacity: 0.6;
 }
 .card-copy {
   position: relative;

@@ -177,16 +177,15 @@
   width: 22px;
   height: 22px;
   border-radius: var(--radius-round);
-  background: var(--game-accent);
-  color: var(--game-accent-ink);
+  color: var(--game-accent);
+  background: var(--game-accent-ink);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 10px;
   font-weight: 800;
-  border: 2px solid var(--game-accent-ink);
   transform: translate(-50%, -50%);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 0px 2px var(--game-accent);
   will-change: left;
   transition:
     left var(--tug-spring-duration) var(--tug-spring),
