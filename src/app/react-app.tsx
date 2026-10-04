@@ -359,10 +359,34 @@ function gameTitle(view: Exclude<View, 'menu' | 'settings' | 'stats'>, language:
 }
 
 const CONNECT_PREVIEW_SLOTS: ReadonlyArray<'x' | 'o' | null> = [
-  null, null, null, null, 'x', null, null,
-  null, null, null, 'x', 'o', null, null,
-  null, null, 'x', 'o', 'x', null, null,
-  null, 'x', 'o', 'o', 'o', null, null,
+  null,
+  null,
+  null,
+  null,
+  'x',
+  null,
+  null,
+  null,
+  null,
+  null,
+  'x',
+  'o',
+  null,
+  null,
+  null,
+  null,
+  'x',
+  'o',
+  'x',
+  null,
+  null,
+  null,
+  'x',
+  'o',
+  'o',
+  'o',
+  null,
+  null,
 ];
 
 interface OthelloPreviewCell {
@@ -371,10 +395,30 @@ interface OthelloPreviewCell {
 }
 
 const OTHELLO_PREVIEW_CELLS: ReadonlyArray<OthelloPreviewCell> = [
-  {hint: true}, { hint: true }, { hint: true }, { hint: true }, { hint: true }, { hint: true },
-  {hint: true}, { hint: true }, { disc: 'dark' }, { disc: 'light' }, { hint: true }, { hint: true },
-  {hint: true}, { hint: true }, { disc: 'light' }, { disc: 'dark' }, { hint: true }, { hint: true },
-  {hint: true}, { hint: true }, { hint: true }, { hint: true }, { hint: true }, { hint: true },
+  { hint: true },
+  { hint: true },
+  { hint: true },
+  { hint: true },
+  { hint: true },
+  { hint: true },
+  { hint: true },
+  { hint: true },
+  { disc: 'dark' },
+  { disc: 'light' },
+  { hint: true },
+  { hint: true },
+  { hint: true },
+  { hint: true },
+  { disc: 'light' },
+  { disc: 'dark' },
+  { hint: true },
+  { hint: true },
+  { hint: true },
+  { hint: true },
+  { hint: true },
+  { hint: true },
+  { hint: true },
+  { hint: true },
 ];
 
 interface ColorWarPreviewCell {
@@ -569,8 +613,7 @@ function MenuPage({
             <div className="reaction-mini-arena">
               <span className="reaction-mini-wave two" />
               <span className="reaction-mini-wave one" />
-              <div className="reaction-mini-orb">
-              </div>
+              <div className="reaction-mini-orb"></div>
             </div>
           }
           firstMeta={
@@ -648,9 +691,7 @@ function MenuPage({
               <line x1="130" y1="74" x2="130" y2="106" className="dots-mini-edge is-active" />
               <line x1="170" y1="74" x2="170" y2="106" className="dots-mini-edge is-active" />
               {[10, 42, 74, 106].map((y) =>
-                [10, 50, 90, 130, 170].map((x) => (
-                  <circle key={`${x}-${y}`} cx={x} cy={y} r="2.8" className="dots-mini-dot" />
-                ))
+                [10, 50, 90, 130, 170].map((x) => <circle key={`${x}-${y}`} cx={x} cy={y} r="2.8" className="dots-mini-dot" />),
               )}
             </svg>
           }
@@ -701,22 +742,58 @@ function MenuPage({
           visual={
             <div className="nim-mini-board">
               <div className="nim-mini-row">
-                <span className="nim-mini-match"><i /><b /></span>
-                <span className="nim-mini-match"><i /><b /></span>
-                <span className="nim-mini-match"><i /><b /></span>
+                <span className="nim-mini-match">
+                  <i />
+                  <b />
+                </span>
+                <span className="nim-mini-match">
+                  <i />
+                  <b />
+                </span>
+                <span className="nim-mini-match">
+                  <i />
+                  <b />
+                </span>
               </div>
               <div className="nim-mini-row">
-                <span className="nim-mini-match"><i /><b /></span>
-                <span className="nim-mini-match is-staged"><i /><b /></span>
-                <span className="nim-mini-match"><i /><b /></span>
-                <span className="nim-mini-match"><i /><b /></span>
+                <span className="nim-mini-match">
+                  <i />
+                  <b />
+                </span>
+                <span className="nim-mini-match is-staged">
+                  <i />
+                  <b />
+                </span>
+                <span className="nim-mini-match">
+                  <i />
+                  <b />
+                </span>
+                <span className="nim-mini-match">
+                  <i />
+                  <b />
+                </span>
               </div>
               <div className="nim-mini-row">
-                <span className="nim-mini-match"><i /><b /></span>
-                <span className="nim-mini-match"><i /><b /></span>
-                <span className="nim-mini-match"><i /><b /></span>
-                <span className="nim-mini-match"><i /><b /></span>
-                <span className="nim-mini-match"><i /><b /></span>
+                <span className="nim-mini-match">
+                  <i />
+                  <b />
+                </span>
+                <span className="nim-mini-match">
+                  <i />
+                  <b />
+                </span>
+                <span className="nim-mini-match">
+                  <i />
+                  <b />
+                </span>
+                <span className="nim-mini-match">
+                  <i />
+                  <b />
+                </span>
+                <span className="nim-mini-match">
+                  <i />
+                  <b />
+                </span>
               </div>
             </div>
           }
