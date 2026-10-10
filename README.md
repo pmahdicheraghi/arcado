@@ -18,7 +18,7 @@ npm run build
 npm run preview
 ```
 
-The service worker is registered only in production builds, so offline and update behavior should be tested through `npm run preview` rather than the development server. Each production build uses the package release and short Git commit as its identity, for example `1.3.0+b2a0c51`. Installed copies check for releases on launch, reconnect, tab focus, and every five minutes. A release downloads in the background, then waits for the user to apply it from the menu so an active match is never interrupted.
+The service worker is registered only in production builds, so offline behavior should be tested through `npm run preview` rather than the development server. Each production build uses the package release and short Git commit as its identity, for example `1.3.0+b2a0c51`.
 
 ## Code quality
 

@@ -471,116 +471,12 @@ h1 em {
   line-height: 1.5;
   font-size: var(--text-body);
 }
-.header-install-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  min-height: 34px;
-  padding: 7px 10px;
-  border: var(--border-thin) solid var(--acid-border);
-  border-radius: var(--radius-pill);
-  background: var(--acid-tint);
-  color: var(--acid);
-  font-family: var(--font-mono);
-  font-size: var(--text-caption);
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  transition:
-    background var(--duration-normal) var(--ease-standard),
-    border-color var(--duration-normal) var(--ease-standard),
-    transform var(--duration-normal) var(--ease-standard);
-}
-.header-install-btn:hover {
-  border-color: var(--acid);
-  background: var(--acid-wash);
-  transform: translateY(-1px);
-}
-.header-install-btn:disabled {
-  cursor: wait;
-  opacity: 0.75;
-  transform: none;
-}
-.header-install-btn .icon {
-  width: 14px;
-  height: 14px;
-}
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-.header-update-btn:disabled .icon {
-  animation: spin 1s linear infinite;
-}
-.update-banner {
-  position: relative;
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  margin-top: 24px;
-  padding: 14px;
-  border: var(--border-thin) solid var(--acid-border);
-  border-radius: var(--radius-md);
-  background: var(--panel);
-}
-.update-banner + .welcome {
-  padding-top: 34px;
-}
-.update-copy {
-  display: grid;
-  gap: 3px;
-}
-.update-copy strong {
-  color: var(--ink);
-  font-size: var(--text-body-sm);
-}
-.update-copy span {
-  color: var(--muted);
-  font-size: var(--text-label);
-  line-height: 1.4;
-}
-.update-actions {
-  display: grid;
-  flex: 0 0 auto;
-  gap: 5px;
-}
-.update-primary,
-.update-later {
-  min-width: 88px;
-  padding: 7px 10px;
-  border-radius: var(--radius-sm);
-  font-size: var(--text-label);
-  font-weight: 600;
-}
-.update-primary {
-  background: var(--acid);
-  color: var(--ink-on-acid);
-}
-.update-later {
-  background: var(--surface-tint);
-  color: var(--muted);
-}
-.update-primary:disabled,
-.update-later:disabled {
-  cursor: wait;
-  opacity: 0.65;
-}
 @media (max-width: 360px) {
   .menu-topbar .brand > span:last-child {
     display: none;
   }
   .menu-topbar-actions {
     gap: 9px;
-  }
-  .update-banner {
-    align-items: stretch;
-    flex-direction: column;
-  }
-  .update-actions {
-    grid-template-columns: 1fr 1fr;
   }
 }
 .game-list {

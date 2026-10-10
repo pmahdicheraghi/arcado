@@ -27,12 +27,9 @@ self.addEventListener('install', (event) => {
         .filter((url) => !url.startsWith('http://') && !url.startsWith('https://') && !url.startsWith('//'));
       const urls = [...new Set([...APP_SHELL, ...htmlAssets])];
       await cache.addAll(urls);
+      await self.skipWaiting();
     })(),
   );
-});
-
-self.addEventListener('message', (event) => {
-  if (event.data?.type === 'SKIP_WAITING') void self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {
@@ -50,13 +47,6 @@ self.addEventListener('fetch', (event) => {
   const request = event.request;
   const requestUrl = new URL(request.url);
   if (request.method !== 'GET' || requestUrl.origin !== self.location.origin) return;
-
-  // Release checks must always reach the server or an installed copy could
-  // remain pinned to a cached version marker indefinitely.
-  if (requestUrl.pathname.endsWith('/version.json')) {
-    event.respondWith(fetch(request));
-    return;
-  }
 
   if (request.mode === 'navigate') {
     event.respondWith(

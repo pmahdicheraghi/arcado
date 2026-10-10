@@ -3,7 +3,7 @@ import { applySettings, loadSettings, saveSettings, type SettingKey, type Settin
 import type { GameSetup, View } from './types';
 import { MusicController } from './music';
 import { unlockAudio, playTapSound } from './sfx';
-import { addEitaaToHomeScreen, checkEitaaHomeScreen, initEitaaSdk, setEitaaBackButton } from './eitaa';
+import { initEitaaSdk, setEitaaBackButton } from './eitaa';
 import { SettingsPage } from '../pages/settings/SettingsPage';
 import { TicTacToePage } from '../pages/tic-tac-toe/TicTacToePage';
 import { MemoryMatchPage } from '../pages/memory-match/MemoryMatchPage';
@@ -20,49 +20,10 @@ import { StatsPage } from '../components/StatsDialog';
 import { translate, useI18n, type Language } from './i18n';
 import { animateIn } from './animation';
 import { Icon } from '../components/react-layout';
-import { resolveHeaderAction, usePwaUpdate } from './usePwaUpdate';
 import { limitPlayerName, loadPlayerNames, normalizePlayerName, savePlayerNames, type PlayerNames } from './player-names';
 
-type InstallOutcome = 'accepted' | 'dismissed';
 type HistoryView = View | 'setup';
 const HISTORY_VIEW_KEY = 'sideQuestView';
-
-interface BeforeInstallPromptEvent extends Event {
-  prompt: () => Promise<void>;
-  userChoice: Promise<{ outcome: InstallOutcome; platform: string }>;
-}
-
-const PWA_INSTALLED_KEY = 'pwa_installed';
-
-function isStandaloneDisplayMode(): boolean {
-  if (typeof window === 'undefined') return false;
-  return (
-    window.matchMedia('(display-mode: standalone)').matches ||
-    window.matchMedia('(display-mode: window-controls-overlay)').matches ||
-    window.matchMedia('(display-mode: fullscreen)').matches ||
-    window.matchMedia('(display-mode: minimal-ui)').matches ||
-    Boolean((navigator as Navigator & { standalone?: boolean }).standalone) ||
-    document.referrer.startsWith('android-app://')
-  );
-}
-
-function getInitialIsInstalled(): boolean {
-  if (isStandaloneDisplayMode()) return true;
-  try {
-    return localStorage.getItem(PWA_INSTALLED_KEY) === 'true';
-  } catch {
-    return false;
-  }
-}
-
-function setStorageInstalled(installed: boolean): void {
-  try {
-    if (installed) localStorage.setItem(PWA_INSTALLED_KEY, 'true');
-    else localStorage.removeItem(PWA_INSTALLED_KEY);
-  } catch {
-    // Storage access may fail in private mode or embedded frames.
-  }
-}
 
 export function ReactApp(): ReactElement {
   const { language } = useI18n();
@@ -71,68 +32,18 @@ export function ReactApp(): ReactElement {
   const [gameSetup, setGameSetup] = useState<GameSetup>({ mode: 'bot', difficulty: 'normal', rounds: 3 });
   const [settings, setSettings] = useState<Settings>(() => loadSettings());
   const [playerNames, setPlayerNames] = useState<PlayerNames>(() => loadPlayerNames());
-  const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
-  const [isInstalled, setIsInstalled] = useState(getInitialIsInstalled);
-  const [eitaaCanAddToHomeScreen, setEitaaCanAddToHomeScreen] = useState(false);
-  const [dismissedUpdate, setDismissedUpdate] = useState<string | null>(null);
   const musicRef = useRef<MusicController | null>(null);
-  const pwaUpdate = usePwaUpdate();
 
   if (!musicRef.current) musicRef.current = new MusicController(settings.music);
 
   useEffect(() => {
     initEitaaSdk();
-    return checkEitaaHomeScreen(setEitaaCanAddToHomeScreen);
   }, []);
 
   useEffect(() => {
     applySettings(settings);
     musicRef.current?.setEnabled(settings.music);
   }, [settings]);
-
-  useEffect(() => {
-    const handleBeforeInstallPrompt = (event: Event) => {
-      event.preventDefault();
-      setInstallPrompt(event as BeforeInstallPromptEvent);
-      setIsInstalled(false);
-      setStorageInstalled(false);
-    };
-    const handleAppInstalled = () => {
-      setInstallPrompt(null);
-      setIsInstalled(true);
-      setStorageInstalled(true);
-    };
-
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    window.addEventListener('appinstalled', handleAppInstalled);
-
-    if ('getInstalledRelatedApps' in navigator) {
-      (navigator as Navigator & { getInstalledRelatedApps?: () => Promise<unknown[]> })
-        .getInstalledRelatedApps?.()
-        .then((apps) => {
-          if (Array.isArray(apps) && apps.length > 0) {
-            setIsInstalled(true);
-            setStorageInstalled(true);
-          }
-        })
-        .catch(() => {});
-    }
-
-    const standaloneMedia = window.matchMedia('(display-mode: standalone)');
-    const handleMediaChange = (event: MediaQueryListEvent) => {
-      if (event.matches) {
-        setIsInstalled(true);
-        setStorageInstalled(true);
-      }
-    };
-    standaloneMedia.addEventListener?.('change', handleMediaChange);
-
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-      window.removeEventListener('appinstalled', handleAppInstalled);
-      standaloneMedia.removeEventListener?.('change', handleMediaChange);
-    };
-  }, []);
 
   useEffect(() => {
     window.history.replaceState(historyStateFor('menu'), '');
@@ -244,20 +155,6 @@ export function ReactApp(): ReactElement {
     setPendingGame(null);
   };
 
-  const installApp = async () => {
-    if (addEitaaToHomeScreen()) {
-      return;
-    }
-    if (!installPrompt) return;
-    await installPrompt.prompt();
-    const { outcome } = await installPrompt.userChoice;
-    setInstallPrompt(null);
-    if (outcome === 'accepted') {
-      setIsInstalled(true);
-      setStorageInstalled(true);
-    }
-  };
-
   return (
     <div
       className="react-content"
@@ -270,20 +167,7 @@ export function ReactApp(): ReactElement {
         unlockAudio();
       }}
     >
-      {view === 'menu' && (
-        <MenuPage
-          onNavigate={navigate}
-          isInstalled={isInstalled}
-          canInstall={!isInstalled && Boolean(installPrompt || eitaaCanAddToHomeScreen)}
-          onInstall={installApp}
-          isUpdateAvailable={pwaUpdate.status === 'ready' || pwaUpdate.status === 'applying'}
-          updateVersion={pwaUpdate.availableVersion}
-          isUpdating={pwaUpdate.status === 'applying'}
-          showUpdate={(pwaUpdate.status === 'ready' || pwaUpdate.status === 'applying') && dismissedUpdate !== pwaUpdate.availableVersion}
-          onUpdate={pwaUpdate.applyUpdate}
-          onDismissUpdate={() => setDismissedUpdate(pwaUpdate.availableVersion)}
-        />
-      )}
+      {view === 'menu' && <MenuPage onNavigate={navigate} />}
       {view === 'settings' && (
         <SettingsPage
           settings={settings}
@@ -450,29 +334,7 @@ const COLOR_WAR_PREVIEW_CELLS: ReadonlyArray<ColorWarPreviewCell> = [
   {},
 ];
 
-function MenuPage({
-  onNavigate,
-  isInstalled,
-  canInstall,
-  onInstall,
-  isUpdateAvailable,
-  updateVersion,
-  isUpdating,
-  showUpdate,
-  onUpdate,
-  onDismissUpdate,
-}: {
-  onNavigate: (view: View) => void;
-  isInstalled: boolean;
-  canInstall: boolean;
-  onInstall: () => void;
-  isUpdateAvailable: boolean;
-  updateVersion: string | null;
-  isUpdating: boolean;
-  showUpdate: boolean;
-  onUpdate: () => void;
-  onDismissUpdate: () => void;
-}) {
+function MenuPage({ onNavigate }: { onNavigate: (view: View) => void }) {
   const { language, t } = useI18n();
   const [isOnline, setIsOnline] = useState(() => navigator.onLine);
 
@@ -519,23 +381,6 @@ function MenuPage({
           </button>
         </div>
       </header>
-
-      {showUpdate && updateVersion && (
-        <section className="update-banner" role="status" aria-live="polite">
-          <div className="update-copy">
-            <strong>{t('updateReady', { version: updateVersion })}</strong>
-            <span>{t('updateDescription')}</span>
-          </div>
-          <div className="update-actions">
-            <button type="button" className="update-primary" onClick={onUpdate} disabled={isUpdating}>
-              {t(isUpdating ? 'updating' : 'updateNow')}
-            </button>
-            <button type="button" className="update-later" onClick={onDismissUpdate} disabled={isUpdating}>
-              {t('updateLater')}
-            </button>
-          </div>
-        </section>
-      )}
 
       <section className="welcome">
         <div className="eyebrow">

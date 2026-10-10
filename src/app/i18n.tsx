@@ -12,7 +12,6 @@ const en = {
   heroSmallGames: 'Small games.',
   heroBigEnergy: 'Big energy.',
   heroIntro: 'Quick rounds for wherever you are. Pick a game and pass the phone.',
-  installApp: 'Install Game',
   chooseGame: 'Choose a game',
   logic: '01 / Logic',
   ticTacToe: 'Tic Tac Toe',
@@ -65,11 +64,6 @@ const en = {
   footerTagline: 'Two-minute breaks, maximum fun',
   version: 'Version {version}',
   build: 'Build {build}',
-  updateReady: 'Version {version} is ready',
-  updateDescription: 'Restart to use the latest version.',
-  updateNow: 'Update now',
-  updateLater: 'Later',
-  updating: 'Updating…',
   newQuest: 'New quest',
   setupGame: 'Set up {game}',
   setupIntro: 'Choose your challenge before the first round.',
@@ -254,7 +248,6 @@ const fa: Record<TranslationKey, string> = {
   heroSmallGames: 'بازی‌های دونفره.',
   heroBigEnergy: 'سریع و پرهیجان.',
   heroIntro: 'مجموعه‌ای از بازی‌های جذاب برای سرگرمی، رقابت دوستانه و کل‌کل با ربات. یک بازی را انتخاب کنید و لذت ببرید!',
-  installApp: 'نصب بازی',
   chooseGame: 'انتخاب بازی',
   logic: '۰۱ / منطق',
   ticTacToe: 'دوز',
@@ -307,11 +300,6 @@ const fa: Record<TranslationKey, string> = {
   footerTagline: 'سرگرمی‌های کوتاه، لذت بی‌پایان',
   version: 'نسخهٔ {version}',
   build: 'ساخت {build}',
-  updateReady: 'نسخهٔ جدید ({version}) آماده است',
-  updateDescription: 'برای استفاده از نسخهٔ جدید، بازی را دوباره باز کنید.',
-  updateNow: 'به‌روزرسانی',
-  updateLater: 'بعداً',
-  updating: 'در حال به‌روزرسانی…',
   newQuest: 'شروع مرحله',
   setupGame: 'تنظیم {game}',
   setupIntro: 'پیش از شروع مسابقه، تعداد دورها و نحوه بازی را مشخص کنید.',
@@ -489,7 +477,7 @@ const LANGUAGE_STORAGE_KEY = 'side-quest-language';
 
 function interpolate(template: string, variables?: Record<string, string | number>): string {
   if (!variables) return template;
-  return template.replace(/\{(\w+)\}/g, (_, key: string) => String(variables[key] ?? `{${key}}`));
+  return template.replace(/\{(\w+)}/g, (_, key: string) => String(variables[key] ?? `{${key}}`));
 }
 
 export function translate(language: Language, key: TranslationKey, variables?: Record<string, string | number>): string {

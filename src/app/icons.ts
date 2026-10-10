@@ -1,7 +1,5 @@
 export const iconPaths: Record<string, string> = {
   arrow: '<path d="M4 12h15M13 6l6 6-6 6"/>',
-  download: '<path d="M12 3v12M7 10l5 5 5-5M4 20h16"/>',
-  update: '<path d="M20 7v5h-5M4 17v-5h5"/><path d="M6.1 9a7 7 0 0 1 11.7-2.6L20 12M4 12l2.2 5.6A7 7 0 0 0 17.9 15"/>',
   chevronDown: '<path d="m6 9 6 6 6-6"/>',
   grid: '<rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/>',
   spark: '<path d="m12 2 1.3 6.7L20 10l-6.7 1.3L12 18l-1.3-6.7L4 10l6.7-1.3L12 2Z"/>',
