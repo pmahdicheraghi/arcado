@@ -1036,6 +1036,71 @@ h1 em {
   border: 1.5px dashed var(--game-accent-ink);
   opacity: 0.6;
 }
+
+/* Quoridor: Tilted 4x3 maze preview with pawns, move hints, and intersecting walls */
+.quoridor-mini-board {
+  position: relative;
+  display: grid;
+  direction: ltr;
+  grid-template-columns: repeat(4, 34px);
+  grid-template-rows: repeat(3, 34px);
+  gap: 8px;
+  transform: rotate(-6deg) scale(1.26);
+  transform-origin: center center;
+}
+.quoridor-mini-cell {
+  width: 34px;
+  height: 34px;
+  border-radius: 6px;
+  border: 1.5px solid color-mix(in srgb, var(--game-accent-ink) 28%, transparent);
+  display: grid;
+  place-items: center;
+}
+.quoridor-mini-cell.is-pawn-x::after,
+.quoridor-mini-cell.is-pawn-o::after {
+  content: '';
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-round);
+}
+.quoridor-mini-cell.is-pawn-x::after {
+  background: var(--game-accent-ink);
+}
+.quoridor-mini-cell.is-pawn-o::after {
+  background: color-mix(in srgb, var(--game-accent-ink) 45%, transparent);
+  border: 2px solid var(--game-accent-ink);
+}
+.quoridor-mini-cell.is-hint::after {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-round);
+  background: var(--game-accent-ink);
+  opacity: 0.6;
+}
+.quoridor-mini-wall {
+  position: absolute;
+  border-radius: var(--radius-pill);
+  background: var(--game-accent-ink);
+}
+.quoridor-mini-wall.is-h-top {
+  top: 36px;
+  left: 0;
+  width: 76px;
+  height: 5px;
+}
+.quoridor-mini-wall.is-v-mid {
+  top: 42px;
+  left: 78px;
+  width: 5px;
+  height: 76px;
+}
+.quoridor-mini-wall.is-h-bot {
+  top: 78px;
+  left: 84px;
+  width: 76px;
+  height: 5px;
+}
 .card-copy {
   position: relative;
   z-index: 2;

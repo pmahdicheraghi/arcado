@@ -2,7 +2,18 @@ import type { GameDifficulty, View } from './types';
 
 export type GameKey = Exclude<View, 'menu' | 'settings' | 'stats'>;
 
-export const GAME_KEYS: readonly GameKey[] = ['tic', 'memory', 'reaction', 'connect', 'dots', 'othello', 'nim', 'tug', 'colorwar'] as const;
+export const GAME_KEYS: readonly GameKey[] = [
+  'tic',
+  'memory',
+  'reaction',
+  'connect',
+  'dots',
+  'othello',
+  'nim',
+  'tug',
+  'colorwar',
+  'quoridor',
+] as const;
 
 export interface GameStats {
   played: number;
@@ -44,6 +55,7 @@ export function createDefaultAllStats(): AllStats {
     nim: createDefaultGameStats(),
     tug: createDefaultGameStats(),
     colorwar: createDefaultGameStats(),
+    quoridor: createDefaultGameStats(),
   };
 }
 

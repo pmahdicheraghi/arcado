@@ -1,5 +1,5 @@
 export type View =
-  'menu' | 'tic' | 'memory' | 'reaction' | 'connect' | 'dots' | 'othello' | 'nim' | 'tug' | 'colorwar' | 'settings' | 'stats';
+  'menu' | 'tic' | 'memory' | 'reaction' | 'connect' | 'dots' | 'othello' | 'nim' | 'tug' | 'colorwar' | 'quoridor' | 'settings' | 'stats';
 export type GameMode = 'bot' | 'two';
 export type Player = 'X' | 'O';
 export type GameDifficulty = 'easy' | 'normal' | 'hard';

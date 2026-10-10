@@ -154,6 +154,11 @@
   --game-accent-ink: #231c12;
 }
 
+.theme-quoridor {
+  --game-accent: #5ce0d8;
+  --game-accent-ink: #122928;
+}
+
 .theme-tic,
 .theme-memory,
 .theme-reaction,
@@ -162,7 +167,8 @@
 .theme-othello,
 .theme-nim,
 .theme-tug,
-.theme-colorwar {
+.theme-colorwar,
+.theme-quoridor {
   --game-tint: color-mix(in srgb, var(--game-accent) 15%, transparent);
   --game-wash: color-mix(in srgb, var(--game-accent) 8%, transparent);
   --game-border: color-mix(in srgb, var(--game-accent) 35%, transparent);

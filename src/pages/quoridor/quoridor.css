@@ -1,0 +1,235 @@
+.quoridor-board-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.quoridor-mode-switch {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  width: min(100%, 240px);
+  padding: 4px;
+  margin-bottom: 12px;
+  border-radius: var(--radius-pill);
+  border: var(--border-thin) solid var(--line);
+  background: var(--panel);
+}
+
+.quoridor-mode-btn {
+  min-height: 32px;
+  padding: 5px 12px;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--muted);
+  font-size: var(--text-detail);
+  font-weight: 600;
+  transition:
+    background var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard);
+}
+
+.quoridor-mode-btn.is-active {
+  background: var(--game-accent);
+  color: var(--game-accent-ink);
+}
+
+.quoridor-mode-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.quoridor-board {
+  --quoridor-groove: 10px;
+  position: relative;
+  width: min(100%, 400px);
+  aspect-ratio: 1;
+  margin: 0 auto;
+  direction: ltr;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr) var(--quoridor-groove)) minmax(0, 1fr);
+  grid-template-rows: repeat(6, minmax(0, 1fr) var(--quoridor-groove)) minmax(0, 1fr);
+  align-items: stretch;
+  justify-items: stretch;
+}
+
+.quoridor-cell {
+  position: relative;
+  z-index: 2;
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-sm);
+  border: var(--border-thin) solid var(--line);
+  background: var(--surface-subtle);
+  transition:
+    background var(--duration-fast) var(--ease-standard),
+    border-color var(--duration-fast) var(--ease-standard);
+}
+
+.quoridor-board.mode-wall .quoridor-cell {
+  pointer-events: none;
+}
+
+.quoridor-cell.is-goal-x {
+  border-top-color: var(--acid-border);
+}
+
+.quoridor-cell.is-goal-o {
+  border-bottom-color: var(--orange-border-soft);
+}
+
+.quoridor-cell.is-valid {
+  cursor: pointer;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .quoridor-cell.is-valid:hover {
+    background: var(--game-wash);
+    border-color: var(--game-border);
+  }
+}
+
+.quoridor-cell:disabled:not(.is-valid) {
+  cursor: default;
+}
+
+.quoridor-move-hint {
+  width: 26%;
+  aspect-ratio: 1;
+  border-radius: var(--radius-round);
+  border: var(--border-thin) solid var(--game-accent);
+  background: var(--game-tint);
+  pointer-events: none;
+}
+
+.quoridor-pawn {
+  width: 68%;
+  height: 68%;
+  border-radius: var(--radius-round);
+  box-shadow: var(--shadow-disc);
+  pointer-events: none;
+}
+
+.quoridor-pawn.pawn-x {
+  background: var(--acid);
+}
+
+.quoridor-pawn.pawn-o {
+  background: var(--orange);
+}
+
+/* Grooves & intersections for staging walls */
+.quoridor-groove,
+.quoridor-vertex {
+  position: relative;
+  z-index: 3;
+  padding: 0;
+  min-width: 0;
+  min-height: 0;
+  background: transparent;
+  border-radius: var(--radius-round);
+}
+
+.quoridor-board.mode-walk .quoridor-groove,
+.quoridor-board.mode-walk .quoridor-vertex {
+  pointer-events: none;
+}
+
+.quoridor-groove:disabled,
+.quoridor-vertex:disabled {
+  cursor: default;
+}
+
+.quoridor-board.mode-wall .quoridor-vertex:not(:disabled) {
+  z-index: 5;
+}
+
+.quoridor-board.mode-wall .quoridor-vertex:not(:disabled)::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 28px;
+  height: 28px;
+  transform: translate(-50%, -50%);
+  border-radius: var(--radius-round);
+}
+
+.quoridor-board.mode-wall .quoridor-vertex:not(:disabled)::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-round);
+  background: var(--game-border);
+  transform: translate(-50%, -50%);
+  transition:
+    transform var(--duration-fast) var(--ease-standard),
+    background var(--duration-fast) var(--ease-standard);
+}
+
+.quoridor-board.mode-wall .quoridor-vertex.is-staged-vertex::before {
+  background: var(--game-accent);
+  transform: translate(-50%, -50%) scale(1.3);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .quoridor-board.mode-wall .quoridor-vertex:not(:disabled):hover::before {
+    background: var(--game-accent);
+    transform: translate(-50%, -50%) scale(1.3);
+  }
+}
+
+/* Placed and staged 2-tile walls spanning 3 grid tracks */
+.quoridor-wall-bar {
+  position: relative;
+  z-index: 4;
+  pointer-events: none;
+  border-radius: var(--radius-pill);
+  align-self: center;
+  justify-self: center;
+}
+
+.quoridor-wall-bar.is-h {
+  width: calc(100% - 2px);
+  height: 5px;
+}
+
+.quoridor-wall-bar.is-v {
+  width: 5px;
+  height: calc(100% - 2px);
+}
+
+.quoridor-wall-bar.owner-x {
+  background: var(--acid);
+}
+
+.quoridor-wall-bar.owner-o {
+  background: var(--orange);
+}
+
+.quoridor-wall-bar.is-staged {
+  background: var(--game-accent);
+  opacity: 0.72;
+}
+
+.quoridor-action-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: min(100%, 400px);
+  min-height: 48px;
+  margin-top: 14px;
+}
+
+@media (max-width: 370px) {
+  .quoridor-board {
+    --quoridor-groove: 8px;
+  }
+}

@@ -53,6 +53,10 @@ The menu currently includes:
 - **Connect Four** — drop discs into seven columns, build a line of four, and block the opponent.
 - **Dots & Boxes** — claim edges, close boxes for extra turns, and control chains against a bot or friend.
 - **Othello** — trap opponent discs between yours, flip entire lines, and claim the board against a bot or friend.
+- **Nim** — take any number of matches from a single row and force your opponent into an empty board.
+- **Tug of War** — rapid head-to-head tapping duel to pull the rope marker across your goal line.
+- **Color War** — place and grow discs that explode at 4 dots to trigger chain-reaction captures.
+- **Quoridor** — race your pawn across a 7×7 grid or place 2-tile walls to detour your opponent.
 
 Every game supports bot and local two-player modes. Status changes are announced to assistive technology, keyboard focus is visible, and nonessential animation follows the system’s reduced-motion preference.
 
@@ -76,6 +80,10 @@ src/
     connect-four/       Connect Four rules, minimax bot, and UI
     dots-boxes/         Dots & Boxes rules, bot tactics, and board UI
     othello/            Othello rules, minimax bot, and board UI
+    nim/                Nim rules, XOR bot, and matchstick UI
+    tug-of-war/         Tug of War rope mechanics, bot, and UI
+    color-war/          Color War chain-reaction rules, bot, and UI
+    quoridor/           Quoridor 7×7 maze rules, BFS pathfinding bot, and UI
     settings/           preferences screen and toggle controls
   styles/
     design-system.css   shared color, shape, border, type, elevation, and motion tokens

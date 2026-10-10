@@ -14,6 +14,7 @@ import { OthelloPage } from '../pages/othello/OthelloPage';
 import { NimPage } from '../pages/nim/NimPage';
 import { TugOfWarPage } from '../pages/tug-of-war/TugOfWarPage';
 import { ColorWarPage } from '../pages/color-war/ColorWarPage';
+import { QuoridorPage } from '../pages/quoridor/QuoridorPage';
 import { GameSetupDialog } from '../components/GameSetupDialog';
 import { StatsPage } from '../components/StatsDialog';
 import { translate, useI18n, type Language } from './i18n';
@@ -219,7 +220,8 @@ export function ReactApp(): ReactElement {
       nextView === 'othello' ||
       nextView === 'nim' ||
       nextView === 'tug' ||
-      nextView === 'colorwar'
+      nextView === 'colorwar' ||
+      nextView === 'quoridor'
     ) {
       window.history.pushState(historyStateFor('setup'), '');
       setPendingGame(nextView);
@@ -301,6 +303,7 @@ export function ReactApp(): ReactElement {
       {view === 'nim' && <NimPage setup={gameSetup} playerNames={activePlayerNames} onExit={returnToMenu} />}
       {view === 'tug' && <TugOfWarPage setup={gameSetup} playerNames={activePlayerNames} onExit={returnToMenu} />}
       {view === 'colorwar' && <ColorWarPage setup={gameSetup} playerNames={activePlayerNames} onExit={returnToMenu} />}
+      {view === 'quoridor' && <QuoridorPage setup={gameSetup} playerNames={activePlayerNames} onExit={returnToMenu} />}
       {pendingGame && (
         <GameSetupDialog
           gameTitle={gameTitle(pendingGame, language)}
@@ -340,6 +343,7 @@ function viewFromHistory(state: unknown): HistoryView | null {
     value === 'nim' ||
     value === 'tug' ||
     value === 'colorwar' ||
+    value === 'quoridor' ||
     value === 'setup' ||
     value === 'stats'
     ? (value as HistoryView)
@@ -355,6 +359,7 @@ function gameTitle(view: Exclude<View, 'menu' | 'settings' | 'stats'>, language:
   if (view === 'nim') return translate(language, 'nim');
   if (view === 'tug') return translate(language, 'tugOfWar');
   if (view === 'colorwar') return translate(language, 'colorwar');
+  if (view === 'quoridor') return translate(language, 'quoridor');
   return translate(language, 'othello');
 }
 
@@ -871,6 +876,42 @@ function MenuPage({
           }
           onSelect={onNavigate}
         />
+        <GameCard
+          view="quoridor"
+          number={t('pathfinding')}
+          title={t('quoridor')}
+          description={t('quoridorDescription')}
+          visual={
+            <div className="quoridor-mini-board">
+              <span className="quoridor-mini-cell" />
+              <span className="quoridor-mini-cell is-pawn-o" />
+              <span className="quoridor-mini-cell" />
+              <span className="quoridor-mini-cell" />
+              <span className="quoridor-mini-cell is-hint" />
+              <span className="quoridor-mini-cell" />
+              <span className="quoridor-mini-cell is-hint" />
+              <span className="quoridor-mini-cell" />
+              <span className="quoridor-mini-cell" />
+              <span className="quoridor-mini-cell is-pawn-x" />
+              <span className="quoridor-mini-cell" />
+              <span className="quoridor-mini-cell" />
+              <i className="quoridor-mini-wall is-h-top" />
+              <i className="quoridor-mini-wall is-v-mid" />
+              <i className="quoridor-mini-wall is-h-bot" />
+            </div>
+          }
+          firstMeta={
+            <>
+              <Icon name="grid" /> {t('fortyNineCells')}
+            </>
+          }
+          secondMeta={
+            <>
+              <Icon name="bot" /> {t('sixWalls')}
+            </>
+          }
+          onSelect={onNavigate}
+        />
       </section>
 
       <footer className="menu-footer">
@@ -918,7 +959,9 @@ function GameCard({
                   ? 'nim-visual'
                   : view === 'colorwar'
                     ? 'colorwar-visual'
-                    : 'tug-visual';
+                    : view === 'quoridor'
+                      ? 'quoridor-visual'
+                      : 'tug-visual';
 
   return (
     <button
