@@ -26,8 +26,6 @@ import {
 } from './quoridor-logic';
 import './quoridor.css';
 
-type ActionMode = 'walk' | 'wall';
-
 export function QuoridorPage({
   setup,
   playerNames,
@@ -44,8 +42,7 @@ export function QuoridorPage({
   const [state, setState] = useState<QuoridorState>(createQuoridorState);
   const [turn, setTurn] = useState<Player>(() => getRoundStarter(1));
   const [roundWinner, setRoundWinner] = useState<Player | null>(null);
-  const [actionMode, setActionMode] = useState<ActionMode>('walk');
-  const [stagedWall, setStagedWall] = useState<QuoridorWall | null>(null);
+  const [stagedMove, setStagedMove] = useState<QuoridorMove | null>(null);
   const botTimeoutRef = useRef<number | null>(null);
   const nextRoundTimeoutRef = useRef<number | null>(null);
 
@@ -61,7 +58,6 @@ export function QuoridorPage({
 
   const isHumanTurn = !roundWinner && !(mode === 'bot' && turn === 'O');
   const currentPlayerWalls = state.remainingWalls[turn];
-  const effectiveMode: ActionMode = isHumanTurn && actionMode === 'wall' && currentPlayerWalls > 0 ? 'wall' : 'walk';
 
   const validMoves = useMemo<CellPos[]>(() => {
     if (roundWinner) return [];
@@ -70,8 +66,7 @@ export function QuoridorPage({
 
   const finishRound = (winner: Player) => {
     setRoundWinner(winner);
-    setStagedWall(null);
-    setActionMode('walk');
+    setStagedMove(null);
     const nextScores = {
       ...scores,
       [winner]: scores[winner] + 1,
@@ -91,8 +86,7 @@ export function QuoridorPage({
   const commitMove = (move: QuoridorMove, mover: Player, isHuman: boolean) => {
     const nextState = applyQuoridorMove(state, mover, move);
     setState(nextState);
-    setStagedWall(null);
-    setActionMode('walk');
+    setStagedMove(null);
     playMoveSound(mover === 'O');
     if (isHuman) triggerHaptic(move.kind === 'wall' ? [10, 18] : 6);
 
@@ -125,33 +119,23 @@ export function QuoridorPage({
       setState(createQuoridorState());
       setTurn(getRoundStarter(nextRound));
       setRoundWinner(null);
-      setStagedWall(null);
-      setActionMode('walk');
+      setStagedMove(null);
     }, 1650);
     return () => {
       if (nextRoundTimeoutRef.current !== null) window.clearTimeout(nextRoundTimeoutRef.current);
     };
   }, [round, roundWinner, setup.rounds]);
 
-  const handleModeSwitch = (nextMode: ActionMode) => {
+  const handleTileClick = (pos: CellPos) => {
     if (!isHumanTurn) return;
-    if (nextMode === 'wall' && currentPlayerWalls <= 0) return;
+    if (!validMoves.some((m) => sameCell(m, pos))) return;
     playTapSound();
     triggerHaptic(5);
-    setActionMode(nextMode);
-    if (nextMode === 'walk') {
-      setStagedWall(null);
-    }
-  };
-
-  const handleTileClick = (pos: CellPos) => {
-    if (!isHumanTurn || effectiveMode !== 'walk') return;
-    if (!validMoves.some((m) => sameCell(m, pos))) return;
-    commitMove({ kind: 'move', to: pos }, turn, true);
+    setStagedMove({ kind: 'move', to: pos });
   };
 
   const handleStageWall = (row: number, col: number, preferred: WallOrientation) => {
-    if (!isHumanTurn || effectiveMode !== 'wall' || currentPlayerWalls <= 0) return;
+    if (!isHumanTurn || currentPlayerWalls <= 0) return;
     playTapSound();
     triggerHaptic(5);
 
@@ -159,14 +143,14 @@ export function QuoridorPage({
     const clampedCol = Math.min(Math.max(0, col), QUORIDOR_WALL_GRID - 1);
 
     // Tapping the same intersection rotates H <-> V when valid
-    if (stagedWall && stagedWall.row === clampedRow && stagedWall.col === clampedCol) {
+    if (stagedMove?.kind === 'wall' && stagedMove.wall.row === clampedRow && stagedMove.wall.col === clampedCol) {
       const flipped: QuoridorWall = {
         row: clampedRow,
         col: clampedCol,
-        orientation: stagedWall.orientation === 'h' ? 'v' : 'h',
+        orientation: stagedMove.wall.orientation === 'h' ? 'v' : 'h',
       };
       if (isValidWallPlacement(state, turn, flipped)) {
-        setStagedWall(flipped);
+        setStagedMove({ kind: 'wall', wall: flipped });
       }
       return;
     }
@@ -181,16 +165,21 @@ export function QuoridorPage({
     for (const cand of candidateCoords) {
       const wall: QuoridorWall = { row: cand.r, col: cand.c, orientation: cand.o };
       if (isValidWallPlacement(state, turn, wall)) {
-        setStagedWall(wall);
+        setStagedMove({ kind: 'wall', wall });
         return;
       }
     }
   };
 
-  const handleConfirmWall = () => {
-    if (!stagedWall || !isHumanTurn || effectiveMode !== 'wall') return;
-    if (!isValidWallPlacement(state, turn, stagedWall)) return;
-    commitMove({ kind: 'wall', wall: stagedWall }, turn, true);
+  const handleConfirmAction = () => {
+    if (!stagedMove || !isHumanTurn) return;
+    if (stagedMove.kind === 'move') {
+      if (!validMoves.some((m) => sameCell(m, stagedMove.to))) return;
+      commitMove(stagedMove, turn, true);
+    } else {
+      if (!isValidWallPlacement(state, turn, stagedMove.wall)) return;
+      commitMove(stagedMove, turn, true);
+    }
   };
 
   const playerName = (player: Player) => playerNames[player];
@@ -230,35 +219,15 @@ export function QuoridorPage({
       <section className="quoridor-board-wrap">
         <GameStatus>{status}</GameStatus>
 
-        <div className="quoridor-mode-switch" role="group" aria-label={t('gameMode')}>
-          <button
-            type="button"
-            className={`quoridor-mode-btn ${effectiveMode === 'walk' ? 'is-active' : ''}`}
-            aria-pressed={effectiveMode === 'walk'}
-            disabled={!isHumanTurn}
-            onClick={() => handleModeSwitch('walk')}
-          >
-            {t('quoridorModeWalk')}
-          </button>
-          <button
-            type="button"
-            className={`quoridor-mode-btn ${effectiveMode === 'wall' ? 'is-active' : ''}`}
-            aria-pressed={effectiveMode === 'wall'}
-            disabled={!isHumanTurn || currentPlayerWalls <= 0}
-            onClick={() => handleModeSwitch('wall')}
-          >
-            {t('quoridorModeWall')}
-          </button>
-        </div>
-
-        <div className={`board-surface quoridor-board mode-${effectiveMode}`} role="group" aria-label={t('quoridorBoard')}>
+        <div className="board-surface quoridor-board" role="group" aria-label={t('quoridorBoard')}>
           {/* 7x7 Tiles */}
           {Array.from({ length: QUORIDOR_SIZE }, (_, r) =>
             Array.from({ length: QUORIDOR_SIZE }, (_, c) => {
               const pos: CellPos = { row: r, col: c };
               const isX = sameCell(state.pawns.X, pos);
               const isO = sameCell(state.pawns.O, pos);
-              const isValid = isHumanTurn && effectiveMode === 'walk' && validMoves.some((m) => sameCell(m, pos));
+              const isValid = isHumanTurn && validMoves.some((m) => sameCell(m, pos));
+              const isStagedTarget = stagedMove?.kind === 'move' && sameCell(stagedMove.to, pos);
               const rowFmt = numberFormatter.format(r + 1);
               const colFmt = numberFormatter.format(c + 1);
               const label = isX
@@ -273,7 +242,7 @@ export function QuoridorPage({
                 <button
                   key={`cell-${r}-${c}`}
                   type="button"
-                  className={`quoridor-cell ${r === 0 ? 'is-goal-x' : ''} ${r === QUORIDOR_SIZE - 1 ? 'is-goal-o' : ''} ${isValid ? 'is-valid' : ''}`}
+                  className={`quoridor-cell ${r === 0 ? 'is-goal-x' : ''} ${r === QUORIDOR_SIZE - 1 ? 'is-goal-o' : ''} ${isValid ? 'is-valid' : ''} ${isStagedTarget ? 'is-staged-cell' : ''}`}
                   style={{ gridRow: r * 2 + 1, gridColumn: c * 2 + 1 }}
                   disabled={!isValid}
                   onClick={() => handleTileClick(pos)}
@@ -281,13 +250,16 @@ export function QuoridorPage({
                 >
                   {isX && <span className="quoridor-pawn pawn-x" />}
                   {isO && <span className="quoridor-pawn pawn-o" />}
-                  {!isX && !isO && isValid && <span className="quoridor-move-hint" aria-hidden="true" />}
+                  {!isX && !isO && isStagedTarget && (
+                    <span className={`quoridor-pawn ${turn === 'X' ? 'pawn-x' : 'pawn-o'} is-staged-pawn`} />
+                  )}
+                  {!isX && !isO && isValid && !isStagedTarget && <span className="quoridor-move-hint" aria-hidden="true" />}
                 </button>
               );
             }),
           )}
 
-          {/* Horizontal groove hit targets (active only in Wall mode) */}
+          {/* Horizontal groove hit targets */}
           {Array.from({ length: QUORIDOR_WALL_GRID }, (_, r) =>
             Array.from({ length: QUORIDOR_SIZE }, (_, c) => (
               <button
@@ -295,7 +267,7 @@ export function QuoridorPage({
                 type="button"
                 className="quoridor-groove is-h"
                 style={{ gridRow: r * 2 + 2, gridColumn: c * 2 + 1 }}
-                disabled={effectiveMode !== 'wall'}
+                disabled={!isHumanTurn || currentPlayerWalls <= 0}
                 onClick={() => handleStageWall(r, c, 'h')}
                 tabIndex={-1}
                 aria-hidden="true"
@@ -303,7 +275,7 @@ export function QuoridorPage({
             )),
           )}
 
-          {/* Vertical groove hit targets (active only in Wall mode) */}
+          {/* Vertical groove hit targets */}
           {Array.from({ length: QUORIDOR_SIZE }, (_, r) =>
             Array.from({ length: QUORIDOR_WALL_GRID }, (_, c) => (
               <button
@@ -311,7 +283,7 @@ export function QuoridorPage({
                 type="button"
                 className="quoridor-groove is-v"
                 style={{ gridRow: r * 2 + 1, gridColumn: c * 2 + 2 }}
-                disabled={effectiveMode !== 'wall'}
+                disabled={!isHumanTurn || currentPlayerWalls <= 0}
                 onClick={() => handleStageWall(r, c, 'v')}
                 tabIndex={-1}
                 aria-hidden="true"
@@ -322,9 +294,9 @@ export function QuoridorPage({
           {/* 6x6 Interior vertex intersections */}
           {Array.from({ length: QUORIDOR_WALL_GRID }, (_, r) =>
             Array.from({ length: QUORIDOR_WALL_GRID }, (_, c) => {
-              const validOrientations = effectiveMode === 'wall' ? getValidOrientationsAt(state, turn, r, c) : [];
-              const isStagedHere = stagedWall?.row === r && stagedWall?.col === c;
-              const isDisabled = effectiveMode !== 'wall' || validOrientations.length === 0;
+              const validOrientations = isHumanTurn && currentPlayerWalls > 0 ? getValidOrientationsAt(state, turn, r, c) : [];
+              const isStagedHere = stagedMove?.kind === 'wall' && stagedMove.wall.row === r && stagedMove.wall.col === c;
+              const isDisabled = !isHumanTurn || currentPlayerWalls <= 0 || validOrientations.length === 0;
 
               return (
                 <button
@@ -333,7 +305,13 @@ export function QuoridorPage({
                   className={`quoridor-vertex ${isStagedHere ? 'is-staged-vertex' : ''}`}
                   style={{ gridRow: r * 2 + 2, gridColumn: c * 2 + 2 }}
                   disabled={isDisabled}
-                  onClick={() => handleStageWall(r, c, isStagedHere && stagedWall ? stagedWall.orientation : (validOrientations[0] ?? 'h'))}
+                  onClick={() =>
+                    handleStageWall(
+                      r,
+                      c,
+                      isStagedHere && stagedMove?.kind === 'wall' ? stagedMove.wall.orientation : (validOrientations[0] ?? 'h'),
+                    )
+                  }
                   aria-label={t('quoridorWallSlot', {
                     row: numberFormatter.format(r + 1),
                     column: numberFormatter.format(c + 1),
@@ -358,13 +336,13 @@ export function QuoridorPage({
           ))}
 
           {/* Staged wall preview */}
-          {stagedWall && effectiveMode === 'wall' && (
+          {stagedMove?.kind === 'wall' && (
             <span
-              className={`quoridor-wall-bar is-${stagedWall.orientation} is-staged`}
+              className={`quoridor-wall-bar is-${stagedMove.wall.orientation} is-staged`}
               style={
-                stagedWall.orientation === 'h'
-                  ? { gridRow: stagedWall.row * 2 + 2, gridColumn: `${stagedWall.col * 2 + 1} / span 3` }
-                  : { gridRow: `${stagedWall.row * 2 + 1} / span 3`, gridColumn: stagedWall.col * 2 + 2 }
+                stagedMove.wall.orientation === 'h'
+                  ? { gridRow: stagedMove.wall.row * 2 + 2, gridColumn: `${stagedMove.wall.col * 2 + 1} / span 3` }
+                  : { gridRow: `${stagedMove.wall.row * 2 + 1} / span 3`, gridColumn: stagedMove.wall.col * 2 + 2 }
               }
               aria-hidden="true"
             />
@@ -372,9 +350,9 @@ export function QuoridorPage({
         </div>
 
         <div className="quoridor-action-bar">
-          {stagedWall && effectiveMode === 'wall' && isHumanTurn && (
-            <button type="button" className="primary-btn" onClick={handleConfirmWall}>
-              {t('quoridorConfirmWall')}
+          {stagedMove && isHumanTurn && (
+            <button type="button" className="primary-btn" onClick={handleConfirmAction}>
+              {t(stagedMove.kind === 'move' ? 'quoridorConfirmMove' : 'quoridorConfirmWall')}
             </button>
           )}
         </div>
